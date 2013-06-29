@@ -94,6 +94,7 @@ public class MainFrame extends JFrame {
 		searchByPanel.add(createButtonFlowPanel());
 
 		JPanel searchPanel = new JPanel();
+		searchPanel.setBackground(Color.WHITE);
 		searchByPanel.add(searchPanel);
 
 		searchTextField = new JTextField();
