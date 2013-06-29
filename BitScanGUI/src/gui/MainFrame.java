@@ -8,23 +8,35 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.io.File;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
+import javax.swing.ListSelectionModel;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
+import objects.CSVFileReader;
+import objects.TicketHolder;
+import objects.TicketsFile;
 
 public class MainFrame extends JFrame {
 
 	private JPanel contentPane;
 	private JTextField searchTextField;
+	private TicketsFile ticketsFile;
+	private JScrollPane scrollPane;
 
 	/**
 	 * Create the frame. Determine basic settings. Initiate build of the main layout.
@@ -79,7 +91,7 @@ public class MainFrame extends JFrame {
 
 		leftPanel.add(createSearchByPanel());
 
-		JScrollPane scrollPane = new JScrollPane();
+		scrollPane = new JScrollPane();
 		scrollPane.setBackground(Color.WHITE);
 		scrollPane.setPreferredSize(new Dimension(400, 500));
 		leftPanel.add(scrollPane);
@@ -146,6 +158,11 @@ public class MainFrame extends JFrame {
 		rightPanel.add(loadPanel);
 
 		JButton loadButton = new JButton("Load");
+		loadButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				openFileChooser();
+			}
+		});
 		loadPanel.add(loadButton);
 
 		JPanel statisticsPanel = new JPanel();
@@ -158,6 +175,29 @@ public class MainFrame extends JFrame {
 		statisticsPanel.add(txtpnStatistics, BorderLayout.NORTH);
 
 		return rightPanel;
+	}
+	
+	private void openFileChooser() {
+		JFileChooser fc = new JFileChooser();
+		FileFilter filter = new FileNameExtensionFilter("CSV file", "csv");
+		fc.setFileFilter(filter);
+		int returnVal = fc.showDialog(this, "Import");		
+		
+		if (returnVal == fc.APPROVE_OPTION) {
+			File f = fc.getSelectedFile();
+			CSVFileReader csv = new CSVFileReader(f);		
+			ticketsFile = csv.read();
+			setListOfTickets();
+		} 
+	}
+
+	private void setListOfTickets() {
+		TicketHolder[] data = ticketsFile.getTicketHolders().values().toArray(new TicketHolder[0]);
+		JList list = new JList(data); //data has type Object[]
+		list.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+		list.setLayoutOrientation(JList.HORIZONTAL_WRAP);
+		list.setVisibleRowCount(-1);
+		scrollPane.getViewport().add(list);		
 	}
 
 }
