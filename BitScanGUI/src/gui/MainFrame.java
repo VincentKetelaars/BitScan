@@ -23,12 +23,14 @@ import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import objects.CSVFileReader;
 import objects.TicketHolder;
+import objects.TicketHolderRenderer;
 import objects.TicketsFile;
 
 public class MainFrame extends JFrame {
@@ -93,7 +95,7 @@ public class MainFrame extends JFrame {
 
 		scrollPane = new JScrollPane();
 		scrollPane.setBackground(Color.WHITE);
-		scrollPane.setPreferredSize(new Dimension(400, 500));
+		scrollPane.setPreferredSize(new Dimension(800, 1000));
 		leftPanel.add(scrollPane);
 
 		return leftPanel;
@@ -194,10 +196,9 @@ public class MainFrame extends JFrame {
 	private void setListOfTickets() {
 		TicketHolder[] data = ticketsFile.getTicketHolders().values().toArray(new TicketHolder[0]);
 		JList list = new JList(data); //data has type Object[]
-		list.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-		list.setLayoutOrientation(JList.HORIZONTAL_WRAP);
-		list.setVisibleRowCount(-1);
-		scrollPane.getViewport().add(list);		
+		list.setCellRenderer(new TicketHolderRenderer());
+		list.setBorder(new EmptyBorder(10, 50, 10, 50));
+		scrollPane.setViewportView(list);
 	}
 
 }
