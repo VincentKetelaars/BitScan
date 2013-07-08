@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -15,15 +16,15 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
-import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
 import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -78,10 +79,23 @@ public class MainFrame extends JFrame {
 	 */
 	protected JPanel createEntranceTab() {
 		JPanel entranceTab = new JPanel(false);
-		entranceTab.setLayout(new GridLayout(1, 1));        
+		entranceTab.setLayout(new BorderLayout(0, 0));
 
-		entranceTab.add(createLeftEntranceTab());
-		entranceTab.add(createRightEntranceTab());
+		JPanel titlePanel = new JPanel();
+		titlePanel.setBackground(Color.WHITE);
+		entranceTab.add(titlePanel, BorderLayout.NORTH);
+
+		JLabel eventTitleLabel = new JLabel("Event");
+		eventTitleLabel.setHorizontalTextPosition(SwingConstants.LEFT);
+		eventTitleLabel.setFont(new Font("Serif", Font.PLAIN, 24));
+		titlePanel.add(eventTitleLabel);
+
+		JPanel entranceCenterPanel = new JPanel();
+		entranceTab.add(entranceCenterPanel, BorderLayout.CENTER);
+		entranceCenterPanel.setLayout(new GridLayout(1, 0, 0, 0));
+
+		entranceCenterPanel.add(createLeftEntranceTab());
+		entranceCenterPanel.add(createRightEntranceTab());
 
 		return entranceTab;
 	}
@@ -178,13 +192,13 @@ public class MainFrame extends JFrame {
 
 		return rightPanel;
 	}
-	
+
 	private void openFileChooser() {
 		JFileChooser fc = new JFileChooser();
 		FileFilter filter = new FileNameExtensionFilter("CSV file", "csv");
 		fc.setFileFilter(filter);
 		int returnVal = fc.showDialog(this, "Import");		
-		
+
 		if (returnVal == fc.APPROVE_OPTION) {
 			File f = fc.getSelectedFile();
 			CSVFileReader csv = new CSVFileReader(f);		
@@ -197,7 +211,6 @@ public class MainFrame extends JFrame {
 		TicketHolder[] data = ticketsFile.getTicketHolders().values().toArray(new TicketHolder[0]);
 		JList list = new JList(data); //data has type Object[]
 		list.setCellRenderer(new TicketHolderRenderer());
-		list.setBorder(new EmptyBorder(10, 50, 10, 50));
 		scrollPane.setViewportView(list);
 	}
 
