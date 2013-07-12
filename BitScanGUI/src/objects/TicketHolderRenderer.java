@@ -53,12 +53,12 @@ public class TicketHolderRenderer implements ListCellRenderer<TicketHolder> {
 		textPanel.setLayout(new BoxLayout(textPanel, BoxLayout.Y_AXIS));
 		
 		JLabel idLabel = new JLabel(value.getId());
-		idLabel.setFont(new Font(Constants.STANDARD_FONT, Font.BOLD, 16));
+		idLabel.setFont(Constants.TICKET_FONT);
 		idLabel.setBorder(new EmptyBorder(marginText, marginText, marginText, marginText));
 		textPanel.add(idLabel);
 		
 		JLabel nameLabel = new JLabel(value.getName());
-		nameLabel.setFont(new Font(Constants.STANDARD_FONT, Font.BOLD, 16));
+		nameLabel.setFont(Constants.TICKET_FONT);
 		nameLabel.setBorder(new EmptyBorder(marginText, marginText, marginText, marginText));
 		textPanel.add(nameLabel);	
 		

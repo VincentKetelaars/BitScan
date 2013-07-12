@@ -9,6 +9,8 @@ public class TicketsFile {
 	
 	private File file;
 	private HashMap<String, TicketHolder> ticketHolders;
+	private int capacity;
+	private int checkedIn;
 	
 	public TicketsFile(File file) {
 		this.file = file;
@@ -36,5 +38,21 @@ public class TicketsFile {
 		
 		sb.append("};\n");
 		return sb.toString();
+	}
+
+	public int getCapacity() {
+		return capacity;
+	}
+
+	public void setCapacity(int capacity) {
+		this.capacity = capacity;
+	}
+
+	public int getCheckedIn() {
+		return checkedIn;
+	}
+
+	public void setCheckedIn(int checkedIn) {
+		this.checkedIn = checkedIn;
 	}
 }

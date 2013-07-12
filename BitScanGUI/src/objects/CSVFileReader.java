@@ -45,15 +45,21 @@ public class CSVFileReader {
 	private TicketsFile readFile() throws IOException {
 		TicketsFile tf = new TicketsFile(file);
 		HashMap<String, TicketHolder> ticketHolders = new HashMap<String, TicketHolder>();
+		int checkedIn = 0;
 
 		BufferedReader reader = Files.newBufferedReader(file.toPath(), ENCODING);
 		String line = null;
 		while ((line = reader.readLine()) != null) {
 			TicketHolder th = parseCSVLine(line);
-			if (th != null)
+			if (th != null) {
 				ticketHolders.put(th.getId(), th);
-		}      
+				if (th.getDateTime() != null) {
+					checkedIn++;
+				}
+			}
+		}
 		
+		tf.setCheckedIn(checkedIn);
 		tf.setTicketHolders(ticketHolders);
 		return tf;
 	}
