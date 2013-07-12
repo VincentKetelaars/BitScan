@@ -18,11 +18,13 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListCellRenderer;
 import javax.swing.border.EmptyBorder;
+
+import constants.Constants;
+
 import java.awt.Cursor;
 
 public class TicketHolderRenderer implements ListCellRenderer<TicketHolder> {
 	
-	final private String imageGreenBarPath = "images/green-bar.gif";
 	final private int itemWidth = 200;
 	final private int itemHeight = 120;
 	final private int imageWidth = 16;
@@ -51,12 +53,12 @@ public class TicketHolderRenderer implements ListCellRenderer<TicketHolder> {
 		textPanel.setLayout(new BoxLayout(textPanel, BoxLayout.Y_AXIS));
 		
 		JLabel idLabel = new JLabel(value.getId());
-		idLabel.setFont(new Font("Serif", Font.BOLD, 16));
+		idLabel.setFont(new Font(Constants.STANDARD_FONT, Font.BOLD, 16));
 		idLabel.setBorder(new EmptyBorder(marginText, marginText, marginText, marginText));
 		textPanel.add(idLabel);
 		
 		JLabel nameLabel = new JLabel(value.getName());
-		nameLabel.setFont(new Font("Serif", Font.BOLD, 16));
+		nameLabel.setFont(new Font(Constants.STANDARD_FONT, Font.BOLD, 16));
 		nameLabel.setBorder(new EmptyBorder(marginText, marginText, marginText, marginText));
 		textPanel.add(nameLabel);	
 		
@@ -67,7 +69,7 @@ public class TicketHolderRenderer implements ListCellRenderer<TicketHolder> {
 		
 		Image img = null;
 		try {
-			img = ImageIO.read(new File(imageGreenBarPath));
+			img = ImageIO.read(new File(Constants.GREEN_BAR));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

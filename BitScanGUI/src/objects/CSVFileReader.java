@@ -8,16 +8,24 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.HashMap;
 
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+
 import org.joda.time.DateTime;
+
+import constants.Constants;
 
 public class CSVFileReader {
 
 	private File file;
 
+	private JFrame frame;
+
 	final static Charset ENCODING = StandardCharsets.UTF_8;
 
-	public CSVFileReader(File file) {
+	public CSVFileReader(File file, JFrame frame) {
 		this.file = file;
+		this.frame = frame;
 	}
 
 	/**
@@ -29,6 +37,7 @@ public class CSVFileReader {
 			return readFile();
 		} catch (IOException e) {
 			e.printStackTrace();
+			showErrorDialog();
 		} 
 		return null;
 	}
@@ -41,7 +50,8 @@ public class CSVFileReader {
 		String line = null;
 		while ((line = reader.readLine()) != null) {
 			TicketHolder th = parseCSVLine(line);
-			ticketHolders.put(th.getId(), th);
+			if (th != null)
+				ticketHolders.put(th.getId(), th);
 		}      
 		
 		tf.setTicketHolders(ticketHolders);
@@ -59,6 +69,8 @@ public class CSVFileReader {
 		
 		if (items.length != 6) {
 			// Something is wrong!
+			showErrorDialog();
+			return null;
 		} else {
 			int table = Integer.parseInt(items[0]);
 			String id = items[1];
@@ -90,6 +102,10 @@ public class CSVFileReader {
 		}
 		DateTime dt = new DateTime(year, month, day, hour, minute, second);
 		return dt;
+	}
+	
+	private void showErrorDialog() {
+		JOptionPane.showMessageDialog(frame, Constants.LOAD_FILE_ERROR_MESSAGE, Constants.LOAD_FILE_ERROR_TITLE, JOptionPane.WARNING_MESSAGE);
 	}
 
 }

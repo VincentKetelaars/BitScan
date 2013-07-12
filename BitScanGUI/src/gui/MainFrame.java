@@ -1,15 +1,19 @@
 package gui;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.util.List;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -18,12 +22,11 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
-import javax.swing.JTextPane;
-import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileFilter;
@@ -33,20 +36,28 @@ import objects.CSVFileReader;
 import objects.TicketHolder;
 import objects.TicketHolderRenderer;
 import objects.TicketsFile;
+import constants.Constants;
 
 public class MainFrame extends JFrame {
+	
+	private final int rightPanelLeftMargin = 20;
+	private final EmptyBorder statisticsLabelsBorder = new EmptyBorder(0, 0, 5, 0);
 
 	private JPanel contentPane;
 	private JTextField searchTextField;
 	private TicketsFile ticketsFile;
 	private JScrollPane scrollPane;
+	private JLabel eventTitleLabel;
+	private JLabel capacityValueLabel;
+	private JLabel checkedInValueLabel;
+	private JLabel availableValueLabel;
 
 	/**
 	 * Create the frame. Determine basic settings. Initiate build of the main layout.
 	 */
 	public MainFrame() {
 		setTitle("BitScan");
-		setBackground(Color.WHITE);
+		setBackground(Constants.BACKGROUND_COLOR);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 711, 518);
 
@@ -65,7 +76,7 @@ public class MainFrame extends JFrame {
 		contentPane.setLayout(new BorderLayout(0, 0));
 
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-		tabbedPane.setBackground(Color.WHITE);
+		tabbedPane.setBackground(Constants.BACKGROUND_COLOR);
 		contentPane.add(tabbedPane);
 
 		JComponent entranceTab = createEntranceTab();
@@ -81,13 +92,12 @@ public class MainFrame extends JFrame {
 		JPanel entranceTab = new JPanel(false);
 		entranceTab.setLayout(new BorderLayout(0, 0));
 
-		JPanel titlePanel = new JPanel();
-		titlePanel.setBackground(Color.WHITE);
+		JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		titlePanel.setBackground(Constants.BACKGROUND_COLOR);
 		entranceTab.add(titlePanel, BorderLayout.NORTH);
 
-		JLabel eventTitleLabel = new JLabel("Event");
-		eventTitleLabel.setHorizontalTextPosition(SwingConstants.LEFT);
-		eventTitleLabel.setFont(new Font("Serif", Font.PLAIN, 24));
+		eventTitleLabel = new JLabel("Event");
+		eventTitleLabel.setFont(new Font(Constants.STANDARD_FONT, Font.PLAIN, 24));
 		titlePanel.add(eventTitleLabel);
 
 		JPanel entranceCenterPanel = new JPanel();
@@ -102,14 +112,31 @@ public class MainFrame extends JFrame {
 
 	private JPanel createLeftEntranceTab() {
 		JPanel leftPanel = new JPanel();
-		leftPanel.setBackground(Color.WHITE);
+		leftPanel.setBackground(Constants.BACKGROUND_COLOR);
 		leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
 
 		leftPanel.add(createSearchByPanel());
 
 		scrollPane = new JScrollPane();
-		scrollPane.setBackground(Color.WHITE);
+		scrollPane.setDropTarget(new DropTarget() {
+	        public synchronized void drop(DropTargetDropEvent evt) {
+	            try {
+	                evt.acceptDrop(DnDConstants.ACTION_COPY);
+	                List<File> droppedFiles = (List<File>) evt.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+	                
+	                if (droppedFiles.size() > 1) {
+	                	showTooManyFilesErrorDialog();
+	                }
+	                	
+	                runCSVReader(droppedFiles.get(0));
+	            } catch (Exception ex) {
+	                ex.printStackTrace();
+	            }
+	        }
+	    });
+		scrollPane.setBackground(Constants.BACKGROUND_COLOR);
 		scrollPane.setPreferredSize(new Dimension(800, 1000));
+		scrollPane.getViewport().setBackground(Constants.BACKGROUND_COLOR);
 		leftPanel.add(scrollPane);
 
 		return leftPanel;
@@ -122,7 +149,7 @@ public class MainFrame extends JFrame {
 		searchByPanel.add(createButtonFlowPanel());
 
 		JPanel searchPanel = new JPanel();
-		searchPanel.setBackground(Color.WHITE);
+		searchPanel.setBackground(Constants.BACKGROUND_COLOR);
 		searchByPanel.add(searchPanel);
 
 		searchTextField = new JTextField();
@@ -139,12 +166,12 @@ public class MainFrame extends JFrame {
 
 	private JPanel createButtonFlowPanel() {
 		JPanel buttonFlowPanel = new JPanel();
-		buttonFlowPanel.setBackground(Color.WHITE);
+		buttonFlowPanel.setBackground(Constants.BACKGROUND_COLOR);
 		buttonFlowPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 
 		JButton barcodeButton = new JButton("Barcode");
 		barcodeButton.setBorder(null);
-		barcodeButton.setBackground(Color.WHITE);
+		barcodeButton.setBackground(Constants.BACKGROUND_COLOR);
 		barcodeButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 			}
@@ -152,12 +179,12 @@ public class MainFrame extends JFrame {
 		buttonFlowPanel.add(barcodeButton);
 
 		JButton nameButton = new JButton("Name");
-		nameButton.setBackground(Color.WHITE);
+		nameButton.setBackground(Constants.BACKGROUND_COLOR);
 		nameButton.setBorder(null);
 		buttonFlowPanel.add(nameButton);
 
 		JButton emailButton = new JButton("Email");
-		emailButton.setBackground(Color.WHITE);
+		emailButton.setBackground(Constants.BACKGROUND_COLOR);
 		emailButton.setBorder(null);
 		buttonFlowPanel.add(emailButton);
 
@@ -166,11 +193,11 @@ public class MainFrame extends JFrame {
 
 	private JPanel createRightEntranceTab() {
 		JPanel rightPanel = new JPanel();
-		rightPanel.setBackground(Color.WHITE);
+		rightPanel.setBackground(Constants.BACKGROUND_COLOR);
 		rightPanel.setLayout(new GridLayout(0, 1, 0, 0));
 
 		JPanel loadPanel = new JPanel();
-		loadPanel.setBackground(Color.WHITE);
+		loadPanel.setBackground(Constants.BACKGROUND_COLOR);
 		rightPanel.add(loadPanel);
 
 		JButton loadButton = new JButton("Load");
@@ -182,13 +209,49 @@ public class MainFrame extends JFrame {
 		loadPanel.add(loadButton);
 
 		JPanel statisticsPanel = new JPanel();
-		statisticsPanel.setBackground(Color.WHITE);
+		statisticsPanel.setBorder(new EmptyBorder(0, rightPanelLeftMargin, 0, 0));
+		statisticsPanel.setBackground(Constants.BACKGROUND_COLOR);
 		rightPanel.add(statisticsPanel);
 		statisticsPanel.setLayout(new BorderLayout(0, 0));
 
-		JTextPane txtpnStatistics = new JTextPane();
-		txtpnStatistics.setText("Statistics");
-		statisticsPanel.add(txtpnStatistics, BorderLayout.NORTH);
+		JLabel statisticsTitleLabel = new JLabel("Statistics");
+		statisticsTitleLabel.setBorder(new EmptyBorder(0, 0, 20, 0));
+		statisticsTitleLabel.setFont(new Font(Constants.STANDARD_FONT, Font.PLAIN, 20));
+		statisticsPanel.add(statisticsTitleLabel, BorderLayout.NORTH);
+		
+		JPanel statisticsTablePanel = new JPanel();
+		statisticsTablePanel.setBackground(Constants.BACKGROUND_COLOR);
+		statisticsPanel.add(statisticsTablePanel, BorderLayout.WEST);
+		statisticsTablePanel.setLayout(new BoxLayout(statisticsTablePanel, BoxLayout.Y_AXIS));
+		
+		JLabel capacityTitleLabel = new JLabel("Capacity");
+		capacityTitleLabel.setBorder(statisticsLabelsBorder);
+		statisticsTablePanel.add(capacityTitleLabel);
+		
+		JLabel checkedInTitleLabel = new JLabel("Checked-In");
+		checkedInTitleLabel.setBorder(statisticsLabelsBorder);
+		statisticsTablePanel.add(checkedInTitleLabel);
+		
+		JLabel availableTitleLabel = new JLabel("Available Tickets");
+		availableTitleLabel.setBorder(statisticsLabelsBorder);
+		statisticsTablePanel.add(availableTitleLabel);
+		
+		JPanel statisticsValuePanel = new JPanel();
+		statisticsValuePanel.setBackground(Constants.BACKGROUND_COLOR);
+		statisticsPanel.add(statisticsValuePanel, BorderLayout.EAST);
+		statisticsValuePanel.setLayout(new BoxLayout(statisticsValuePanel, BoxLayout.Y_AXIS));
+		
+		capacityValueLabel = new JLabel();
+		capacityValueLabel.setBorder(statisticsLabelsBorder);
+		statisticsValuePanel.add(capacityValueLabel);
+		
+		checkedInValueLabel = new JLabel();
+		checkedInValueLabel.setBorder(statisticsLabelsBorder);
+		statisticsValuePanel.add(checkedInValueLabel);
+		
+		availableValueLabel = new JLabel();
+		availableValueLabel.setBorder(statisticsLabelsBorder);
+		statisticsValuePanel.add(availableValueLabel);
 
 		return rightPanel;
 	}
@@ -199,19 +262,36 @@ public class MainFrame extends JFrame {
 		fc.setFileFilter(filter);
 		int returnVal = fc.showDialog(this, "Import");		
 
-		if (returnVal == fc.APPROVE_OPTION) {
-			File f = fc.getSelectedFile();
-			CSVFileReader csv = new CSVFileReader(f);		
-			ticketsFile = csv.read();
-			setListOfTickets();
+		if (returnVal == fc.APPROVE_OPTION) {			 // Continue with appropriate path
+			File f = fc.getSelectedFile();				
+			runCSVReader(f);
 		} 
 	}
+	
+	private void runCSVReader(File f) {
+		final CSVFileReader csv = new CSVFileReader(f, this);
+		Runnable r = new Runnable() {
 
-	private void setListOfTickets() {
+			@Override
+			public void run() {
+				ticketsFile = csv.read();
+				if (ticketsFile != null)
+					setListOfTicketsAndLabels();			
+			}
+		};
+		r.run();
+	}
+
+	private void setListOfTicketsAndLabels() {
+		capacityValueLabel.setText(Integer.toString(ticketsFile.getTicketHolders().size()));
 		TicketHolder[] data = ticketsFile.getTicketHolders().values().toArray(new TicketHolder[0]);
 		JList list = new JList(data); //data has type Object[]
 		list.setCellRenderer(new TicketHolderRenderer());
 		scrollPane.setViewportView(list);
+	}
+	
+	private void showTooManyFilesErrorDialog() {
+		JOptionPane.showMessageDialog(this, Constants.LOAD_MULTIPLE_FILES_ERROR_MESSAGE, Constants.LOAD_FILE_ERROR_TITLE, JOptionPane.WARNING_MESSAGE);
 	}
 
 }
