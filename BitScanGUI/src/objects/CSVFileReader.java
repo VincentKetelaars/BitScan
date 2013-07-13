@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.swing.JFrame;
@@ -45,25 +46,53 @@ public class CSVFileReader {
 	private TicketsFile readFile() throws IOException {
 		TicketsFile tf = new TicketsFile(file);
 		HashMap<String, TicketHolder> ticketHolders = new HashMap<String, TicketHolder>();
-		int checkedIn = 0;
+		ArrayList<TicketSort> ticketSorts = new ArrayList<TicketSort>();
 
 		BufferedReader reader = Files.newBufferedReader(file.toPath(), ENCODING);
-		String line = null;
+		String line = reader.readLine();
+		if (!line.contains(Constants.identifierCSV)) // Should be equals!!!
+			return null;
+
+		// Event line
+		line = reader.readLine();
+		String[] items = line.split(",");
+		String eventName = items[0];
+		String eventDescription = items[1];
+		DateTime startDate = convertStringToDateTime(items[2]);
+		DateTime endDate = convertStringToDateTime(items[3]);
+		int numTicketSorts = Integer.parseInt(items[4]);
+
+		// Kinds of Tickets
+		for (int i = 0; i < numTicketSorts; i++) {
+			line = reader.readLine();
+			items = line.split(",");
+			String ticketName = items[0];
+			int capacity = Integer.parseInt(items[1]);
+			int sold = Integer.parseInt(items[2]);
+			int checkedIn = Integer.parseInt(items[3]);
+			boolean doorSale = convertStringtoBoolean(items[4]);
+
+			TicketSort ts = new TicketSort(ticketName, capacity, sold, checkedIn, doorSale);
+			ticketSorts.add(ts);
+		}
+
+		// Tickets
 		while ((line = reader.readLine()) != null) {
 			TicketHolder th = parseCSVLine(line);
 			if (th != null) {
 				ticketHolders.put(th.getId(), th);
-				if (th.getDateTime() != null) {
-					checkedIn++;
-				}
 			}
 		}
-		
-		tf.setCheckedIn(checkedIn);
+
 		tf.setTicketHolders(ticketHolders);
+		tf.setEventName(eventName);
+		tf.setEventDescription(eventDescription);
+		tf.setStartDate(startDate);
+		tf.setEndDate(endDate);
+		tf.setTicketSorts(ticketSorts);
 		return tf;
 	}
-	
+
 	/**
 	 * Parse a single line, which is one TicketHolder
 	 * @param line
@@ -72,8 +101,8 @@ public class CSVFileReader {
 	private TicketHolder parseCSVLine(String line) {
 		TicketHolder th = new TicketHolder();
 		String[] items = line.split(",");
-		
-		if (items.length != 6) {
+
+		if (items.length != 7) {
 			// Something is wrong!
 			showErrorDialog();
 			return null;
@@ -84,12 +113,13 @@ public class CSVFileReader {
 			DateTime dateTime = convertStringToDateTime(items[3]);
 			String name = items[4];
 			String email = items[5];
-			
-			th.setTicketHolder(table, id, comment, dateTime, name, email);
+			TicketSort ticketSort = new TicketSort(items[6]);
+
+			th.setTicketHolder(table, id, comment, dateTime, name, email, ticketSort);
 		}
 		return th;
 	}
-	
+
 	/**
 	 * Parse a dateTime String of the form: 0000-00-00 00:00:00
 	 * @param dateTime
@@ -109,7 +139,22 @@ public class CSVFileReader {
 		DateTime dt = new DateTime(year, month, day, hour, minute, second);
 		return dt;
 	}
-	
+
+	/**
+	 * Parse true or false string to boolean.
+	 * @param string
+	 * @return
+	 */
+	private boolean convertStringtoBoolean(String s) {
+		switch (s.toLowerCase()) {
+		case "true": 
+			return true;
+		case "false":
+			return false;
+		default: return false;
+		}		
+	}
+
 	private void showErrorDialog() {
 		JOptionPane.showMessageDialog(frame, Constants.LOAD_FILE_ERROR_MESSAGE, Constants.LOAD_FILE_ERROR_TITLE, JOptionPane.WARNING_MESSAGE);
 	}

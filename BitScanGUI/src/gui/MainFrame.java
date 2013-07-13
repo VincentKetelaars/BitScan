@@ -14,11 +14,20 @@ import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 
+import javax.imageio.ImageIO;
 import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
@@ -51,7 +60,7 @@ public class MainFrame extends JFrame {
 	private JLabel capacityValueLabel;
 	private JLabel checkedInValueLabel;
 	private JLabel availableValueLabel;
-	
+
 	private String sortBy = "Barcode";
 
 	/**
@@ -143,6 +152,7 @@ public class MainFrame extends JFrame {
 				}
 			}
 		});
+		scrollPane.setBorder(new EmptyBorder(5,5,5,5));
 		scrollPane.setBackground(Constants.BACKGROUND_COLOR);
 		scrollPane.setPreferredSize(new Dimension(800, 1000));
 		scrollPane.getViewport().setBackground(Constants.BACKGROUND_COLOR);
@@ -164,38 +174,45 @@ public class MainFrame extends JFrame {
 		searchByPanel.add(searchPanel);
 
 		searchTextField = new JTextField();
-		searchPanel.add(searchTextField);
-		searchTextField.setMinimumSize(new Dimension(50, 20));
-		searchTextField.setMaximumSize(new Dimension(5000, 20));
+		searchPanel.add(searchTextField);	
 		searchTextField.setColumns(20);
 
 		JButton searchButton = new JButton("Search");
+		searchButton.addActionListener(searchButtonActionListener);
 		searchPanel.add(searchButton);
 
 		return searchByPanel;
-	}
+	}	
 
 	private JPanel createButtonFlowPanel() {
 		JPanel buttonFlowPanel = new JPanel();
 		buttonFlowPanel.setBackground(Constants.BACKGROUND_COLOR);
 		buttonFlowPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
 
-		JButton barcodeButton = new JButton("Barcode");
+		BufferedImage stopPicture = null;
+		try {
+			stopPicture = ImageIO.read(new File(Constants.WHITE_BACKGROUND));
+		} catch (IOException ex) { }
+		JLabel picLabel = new JLabel(new ImageIcon( stopPicture ));
+
+		JLabel barcodeButton = new JLabel("Barcode");
 		barcodeButton.setFont(Constants.HEADER_FONT);
 		barcodeButton.setBorder(Constants.SORT_BUTTON_BORDER);
 		barcodeButton.setBackground(Constants.BACKGROUND_COLOR);
+		//barcodeButton.addActionListener(sortButtonActionListener);
+		barcodeButton.addMouseListener(sortButtonActionListener);
 		buttonFlowPanel.add(barcodeButton);
 
-		JButton nameButton = new JButton("Name");
-		nameButton.setBorder(Constants.SORT_BUTTON_BORDER);
+		JLabel nameButton = new JLabel("Name");
 		nameButton.setFont(Constants.HEADER_FONT);
-		nameButton.setBackground(Constants.BACKGROUND_COLOR);
+		nameButton.setBorder(Constants.SORT_BUTTON_BORDER);
+		nameButton.addMouseListener(sortButtonActionListener);
 		buttonFlowPanel.add(nameButton);
 
-		JButton emailButton = new JButton("Email");
+		JLabel emailButton = new JLabel("Email");
 		emailButton.setFont(Constants.HEADER_FONT);
 		emailButton.setBorder(Constants.SORT_BUTTON_BORDER);
-		emailButton.setBackground(Constants.BACKGROUND_COLOR);
+		emailButton.addMouseListener(sortButtonActionListener);
 		buttonFlowPanel.add(emailButton);
 
 		return buttonFlowPanel;
@@ -218,10 +235,17 @@ public class MainFrame extends JFrame {
 		});
 		loadPanel.add(loadButton);
 
+		rightPanel.add(createStatisticsPanel());	
+		
+		rightPanel.add(createBuyTicketPanel());
+		
+		return rightPanel;
+	}
+
+	private JPanel createStatisticsPanel() {
 		JPanel statisticsPanel = new JPanel();
 		statisticsPanel.setBorder(new EmptyBorder(0, Constants.RIGHT_PANEL_SIDE_MARGIN, 0, Constants.RIGHT_PANEL_SIDE_MARGIN));
 		statisticsPanel.setBackground(Constants.BACKGROUND_COLOR);
-		rightPanel.add(statisticsPanel);
 		statisticsPanel.setLayout(new BorderLayout(0, 0));
 
 		JLabel statisticsTitleLabel = new JLabel("Statistics");
@@ -265,8 +289,21 @@ public class MainFrame extends JFrame {
 		availableValueLabel.setAlignmentX(Component.RIGHT_ALIGNMENT);
 		availableValueLabel.setBorder(Constants.STATISTICS_LABEL_BORDER);
 		statisticsValuePanel.add(availableValueLabel);
-
-		return rightPanel;
+		
+		return statisticsPanel;
+	}
+	
+	private Component createBuyTicketPanel() {
+		JPanel buyTicketPanel = new JPanel();
+		buyTicketPanel.setBackground(Constants.BACKGROUND_COLOR);
+		buyTicketPanel.setLayout(new BorderLayout(0, 0));
+		buyTicketPanel.setBorder(new EmptyBorder(0, Constants.RIGHT_PANEL_SIDE_MARGIN, 0, Constants.RIGHT_PANEL_SIDE_MARGIN));
+		
+		JLabel purchaseTicketLabel = new JLabel("Purchase Ticket");
+		buyTicketPanel.add(purchaseTicketLabel, BorderLayout.NORTH);
+		purchaseTicketLabel.setFont(Constants.HEADER_FONT);
+		
+		return buyTicketPanel;
 	}
 
 	private void openFileChooser() {
@@ -289,17 +326,30 @@ public class MainFrame extends JFrame {
 			public void run() {
 				ticketsFile = csv.read();
 				if (ticketsFile != null)
-					updateListOfTicketsAndLabels();			
+					updateListOfTicketsAndLabels(ticketsFile.getTicketHolders().values().toArray(new TicketHolder[0]));			
 			}
 		};
 		r.run();
 	}
 
-	private void updateListOfTicketsAndLabels() {
+	private void updateListOfTicketsAndLabels(TicketHolder[] data) {
+		eventTitleLabel.setText(ticketsFile.getEventName());
 		capacityValueLabel.setText(Integer.toString(ticketsFile.getCapacity()));
 		checkedInValueLabel.setText(Integer.toString(ticketsFile.getCheckedIn()));
 		availableValueLabel.setText(Integer.toString(ticketsFile.getCapacity() - ticketsFile.getTicketHolders().size()));
-		TicketHolder[] data = ticketsFile.getTicketHolders().values().toArray(new TicketHolder[0]);
+		switch (sortBy) {
+		case "Barcode": 
+			Arrays.sort(data, IDComparator);
+			break;
+		case "Name": 
+			Arrays.sort(data, NameComparator);
+			break;
+		case "Email": 
+			Arrays.sort(data, EmailComparator);
+			break;
+		default : break;
+		}
+
 		JList list = new JList(data); //data has type Object[]
 		list.setCellRenderer(new TicketHolderRenderer());
 		scrollPane.setViewportView(list);
@@ -308,14 +358,105 @@ public class MainFrame extends JFrame {
 	private void showTooManyFilesErrorDialog() {
 		JOptionPane.showMessageDialog(this, Constants.LOAD_MULTIPLE_FILES_ERROR_MESSAGE, Constants.LOAD_FILE_ERROR_TITLE, JOptionPane.WARNING_MESSAGE);
 	}
-	
-	ActionListener sortButtonActionListener = new ActionListener() {
+
+	MouseListener sortButtonActionListener = new MouseListener() {
+
+		@Override
+		public void mouseReleased(MouseEvent e) {
+			JLabel b = (JLabel) e.getSource();
+			sortBy = b.getText();
+			if (ticketsFile != null) {
+				updateListOfTicketsAndLabels(ticketsFile.getTicketHolders().values().toArray(new TicketHolder[0]));
+			}
+		}
+
+		@Override
+		public void mousePressed(MouseEvent e) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void mouseExited(MouseEvent e) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void mouseEntered(MouseEvent e) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void mouseClicked(MouseEvent e) {
+			// TODO Auto-generated method stub
+
+		}
+	};
+
+	ActionListener searchButtonActionListener = new ActionListener() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			JButton b = (JButton) e.getSource();
-			sortBy = b.getText();
-			updateListOfTicketsAndLabels();
+			ArrayList<TicketHolder> ths = search(searchTextField.getText());
+			updateListOfTicketsAndLabels(ths.toArray(new TicketHolder[0]));
 		}
-	};	
+	};
+
+	Comparator<TicketHolder> IDComparator = new Comparator<TicketHolder>() {
+
+		@Override
+		public int compare(TicketHolder o1, TicketHolder o2) {
+			return o1.getId().compareTo(o2.getId());
+		}
+
+	};
+
+	Comparator<TicketHolder> NameComparator = new Comparator<TicketHolder>() {
+
+		@Override
+		public int compare(TicketHolder o1, TicketHolder o2) {
+			return o1.getName().compareTo(o2.getName());
+		}
+
+	};
+
+	Comparator<TicketHolder> EmailComparator = new Comparator<TicketHolder>() {
+
+		@Override
+		public int compare(TicketHolder o1, TicketHolder o2) {
+			return o1.getEmail().compareTo(o2.getEmail());
+		}
+
+	};
+
+	private ArrayList<TicketHolder> search(String s) {
+		ArrayList<TicketHolder> l = new ArrayList<TicketHolder>();
+		switch (sortBy) {
+		case "Barcode": 
+			TicketHolder th = ticketsFile.getTicketHolders().get(s);
+			if (th != null) l.add(th);
+			break;
+		case "Name": 
+			Collection<TicketHolder> c = ticketsFile.getTicketHolders().values();
+			for (TicketHolder t : c) {
+				if (t.getName().toLowerCase().contains(s.toLowerCase())) {
+					l.add(t);
+				}
+			}
+			break;
+		case "Email":
+			Collection<TicketHolder> col = ticketsFile.getTicketHolders().values();
+			for (TicketHolder t : col) {
+				if (t.getEmail().toLowerCase().contains(s.toLowerCase())) {
+					l.add(t);
+				}
+			}
+			break;
+		default: 
+			return null;
+		}
+		return l;
+	}
 
 }

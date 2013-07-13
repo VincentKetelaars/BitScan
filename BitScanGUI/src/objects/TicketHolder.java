@@ -10,27 +10,30 @@ public class TicketHolder {
 	private DateTime dateTime;
 	private String name;
 	private String email;
+	private TicketSort ticketSort;
 
 	public TicketHolder() {
 		// Don't initialize
 	}
 
-	public TicketHolder(int table, String id, String comment, DateTime dateTime, String name, String email) {
+	public TicketHolder(int table, String id, String comment, DateTime dateTime, String name, String email, TicketSort ticketSort) {
 		setTable(table);
 		setId(id);
 		setComment(comment);
 		setDateTime(dateTime);
 		setName(name);
 		setEmail(email);
+		setTicketSort(ticketSort);
 	}
 
-	public void setTicketHolder(int table, String id, String comment, DateTime dateTime, String name, String email) {
+	public void setTicketHolder(int table, String id, String comment, DateTime dateTime, String name, String email, TicketSort ticketSort) {
 		setTable(table);
 		setId(id);
 		setComment(comment);
 		setDateTime(dateTime);
 		setName(name);
 		setEmail(email);
+		setTicketSort(ticketSort);
 	}
 
 	public int getTable() {
@@ -101,8 +104,17 @@ public class TicketHolder {
 		sb.append("\tdatetime : "+ dateTime +"\n");
 		sb.append("\tname : "+ name +"\n");
 		sb.append("\temail : "+ email +"\n");
+		sb.append("\tticketsort : "+ ticketSort +"\n");
 		sb.append("};");
 		return sb.toString();
+	}
+
+	public TicketSort getTicketSort() {
+		return ticketSort;
+	}
+
+	public void setTicketSort(TicketSort ticketSort) {
+		this.ticketSort = ticketSort;
 	}
 
 }

@@ -1,16 +1,22 @@
 package objects;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
+
+import org.joda.time.DateTime;
 
 public class TicketsFile {
 	
 	private File file;
 	private HashMap<String, TicketHolder> ticketHolders;
-	private int capacity;
-	private int checkedIn;
+	private String eventName;
+	private String eventDescription;
+	private DateTime startDate;
+	private DateTime endDate;
+	private ArrayList<TicketSort> ticketSorts;	
 	
 	public TicketsFile(File file) {
 		this.file = file;
@@ -41,18 +47,58 @@ public class TicketsFile {
 	}
 
 	public int getCapacity() {
-		return capacity;
-	}
-
-	public void setCapacity(int capacity) {
-		this.capacity = capacity;
+		int cap = 0;
+		for (TicketSort ts : getTicketSorts()) {
+			cap += ts.getCapacity();
+		}
+		return cap;
 	}
 
 	public int getCheckedIn() {
+		int checkedIn = 0;
+		for (TicketSort ts : getTicketSorts()) {
+			checkedIn += ts.getCheckedIn();
+		}
 		return checkedIn;
 	}
 
-	public void setCheckedIn(int checkedIn) {
-		this.checkedIn = checkedIn;
+	public String getEventName() {
+		return eventName;
+	}
+
+	public void setEventName(String eventName) {
+		this.eventName = eventName;
+	}
+
+	public String getEventDescription() {
+		return eventDescription;
+	}
+
+	public void setEventDescription(String eventDescription) {
+		this.eventDescription = eventDescription;
+	}
+
+	public DateTime getStartDate() {
+		return startDate;
+	}
+
+	public void setStartDate(DateTime startDate) {
+		this.startDate = startDate;
+	}
+
+	public DateTime getEndDate() {
+		return endDate;
+	}
+
+	public void setEndDate(DateTime endDate) {
+		this.endDate = endDate;
+	}
+
+	public ArrayList<TicketSort> getTicketSorts() {
+		return ticketSorts;
+	}
+
+	public void setTicketSorts(ArrayList<TicketSort> ticketSorts) {
+		this.ticketSorts = ticketSorts;
 	}
 }

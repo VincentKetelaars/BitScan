@@ -36,11 +36,17 @@ public class Constants {
 	
 	/* Strings */
 	
+	// CSV
+	public static final String identifierCSV = "identifier";
+	
 	// Files
 	public static final String GREEN_BAR = "images/green-bar.gif";	
+	public static final String WHITE_BACKGROUND = "images/white_background.gif";
 	
 	// Messages
 	public static final String LOAD_FILE_ERROR_MESSAGE = "This file can not be imported!";
 	public static final String LOAD_FILE_ERROR_TITLE = "Import error";	
 	public static final String LOAD_MULTIPLE_FILES_ERROR_MESSAGE = "You can only import one file!";
+
+
 }
