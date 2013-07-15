@@ -11,7 +11,7 @@ import org.joda.time.DateTime;
 public class TicketsFile {
 	
 	private File file;
-	private HashMap<String, TicketHolder> ticketHolders;
+	private ArrayList<TicketHolder> ticketHolders;
 	private String eventName;
 	private String eventDescription;
 	private DateTime startDate;
@@ -22,12 +22,12 @@ public class TicketsFile {
 		this.file = file;
 	}
 
-	public HashMap<String, TicketHolder> getTicketHolders() {
+	public ArrayList<TicketHolder> getTicketHolders() {
 		return ticketHolders;
 	}
 
-	public void setTicketHolders(HashMap<String, TicketHolder> ticketHolders) {
-		this.ticketHolders = ticketHolders;
+	public void setTicketHolders(ArrayList<TicketHolder> ticketHolders2) {
+		this.ticketHolders = ticketHolders2;
 	}
 	
 	public String toString() {
@@ -37,9 +37,8 @@ public class TicketsFile {
 		sb.append("ticket holders {\n");
 		
 		// Iterate over all TicketHolders
-		Iterator<Entry<String, TicketHolder>> i = ticketHolders.entrySet().iterator();
-		while (i.hasNext()) {
-			sb.append("\t"+i.next().getValue()+"\n");
+		for (TicketHolder i : ticketHolders) {
+			sb.append("\t"+ i +"\n");
 		}
 		
 		sb.append("};\n");

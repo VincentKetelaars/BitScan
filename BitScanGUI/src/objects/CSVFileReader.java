@@ -45,14 +45,16 @@ public class CSVFileReader {
 
 	private TicketsFile readFile() throws IOException {
 		TicketsFile tf = new TicketsFile(file);
-		HashMap<String, TicketHolder> ticketHolders = new HashMap<String, TicketHolder>();
+		ArrayList<TicketHolder> ticketHolders = new ArrayList<TicketHolder>();
 		ArrayList<TicketSort> ticketSorts = new ArrayList<TicketSort>();
 
 		BufferedReader reader = Files.newBufferedReader(file.toPath(), ENCODING);
 		String line = reader.readLine();
-		if (!line.contains(Constants.identifierCSV)) // Should be equals!!!
+		if (!line.contains(Constants.identifierCSV)) {// Should be equals!!!
+			showErrorDialog();
 			return null;
-
+		}
+		
 		// Event line
 		line = reader.readLine();
 		String[] items = line.split(",");
@@ -71,8 +73,9 @@ public class CSVFileReader {
 			int sold = Integer.parseInt(items[2]);
 			int checkedIn = Integer.parseInt(items[3]);
 			boolean doorSale = convertStringtoBoolean(items[4]);
+			int price = (int) Double.parseDouble(items[5]) * 100;
 
-			TicketSort ts = new TicketSort(ticketName, capacity, sold, checkedIn, doorSale);
+			TicketSort ts = new TicketSort(ticketName, price, capacity, sold, checkedIn, doorSale);
 			ticketSorts.add(ts);
 		}
 
@@ -80,7 +83,7 @@ public class CSVFileReader {
 		while ((line = reader.readLine()) != null) {
 			TicketHolder th = parseCSVLine(line);
 			if (th != null) {
-				ticketHolders.put(th.getId(), th);
+				ticketHolders.add(th);
 			}
 		}
 

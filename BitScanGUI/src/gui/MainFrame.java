@@ -21,7 +21,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
@@ -41,12 +40,16 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import objects.CSVFileReader;
 import objects.TicketHolder;
 import objects.TicketHolderRenderer;
+import objects.TicketPanel;
+import objects.TicketSort;
 import objects.TicketsFile;
 import constants.Constants;
 
@@ -56,6 +59,7 @@ public class MainFrame extends JFrame {
 	private JTextField searchTextField;
 	private TicketsFile ticketsFile;
 	private JScrollPane scrollPane;
+	private JPanel showTicketsPanel;
 	private JLabel eventTitleLabel;
 	private JLabel capacityValueLabel;
 	private JLabel checkedInValueLabel;
@@ -174,8 +178,9 @@ public class MainFrame extends JFrame {
 		searchByPanel.add(searchPanel);
 
 		searchTextField = new JTextField();
-		searchPanel.add(searchTextField);	
 		searchTextField.setColumns(20);
+		searchTextField.getDocument().addDocumentListener(searchTextFieldDocumentListener);
+		searchPanel.add(searchTextField);	
 
 		JButton searchButton = new JButton("Search");
 		searchButton.addActionListener(searchButtonActionListener);
@@ -303,6 +308,23 @@ public class MainFrame extends JFrame {
 		buyTicketPanel.add(purchaseTicketLabel, BorderLayout.NORTH);
 		purchaseTicketLabel.setFont(Constants.HEADER_FONT);
 		
+		showTicketsPanel = new JPanel();
+		showTicketsPanel.setBackground(Constants.BACKGROUND_COLOR);
+		showTicketsPanel.setLayout(new BoxLayout(showTicketsPanel, BoxLayout.Y_AXIS));
+		buyTicketPanel.add(showTicketsPanel, BorderLayout.CENTER);
+		
+		JPanel purchaseTicketsPanel = new JPanel();
+		purchaseTicketsPanel.setBorder(new EmptyBorder(10, 0, 0, 0));
+		purchaseTicketsPanel.setBackground(Constants.BACKGROUND_COLOR);
+		purchaseTicketsPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
+		buyTicketPanel.add(purchaseTicketsPanel, BorderLayout.SOUTH);
+		
+		JButton purchaseTicketsButton = new JButton("Purchase Tickets");
+		purchaseTicketsPanel.add(purchaseTicketsButton);
+		
+		JLabel totalCostLabel = new JLabel("0");
+		purchaseTicketsPanel.add(totalCostLabel);
+		
 		return buyTicketPanel;
 	}
 
@@ -326,17 +348,21 @@ public class MainFrame extends JFrame {
 			public void run() {
 				ticketsFile = csv.read();
 				if (ticketsFile != null)
-					updateListOfTicketsAndLabels(ticketsFile.getTicketHolders().values().toArray(new TicketHolder[0]));			
+					updateListOfTicketsAndLabels(ticketsFile.getTicketHolders().toArray(new TicketHolder[0]));			
 			}
 		};
 		r.run();
 	}
 
 	private void updateListOfTicketsAndLabels(TicketHolder[] data) {
-		eventTitleLabel.setText(ticketsFile.getEventName());
+		eventTitleLabel.setText(ticketsFile.getEventName()); // Event label
+		
+		// Statistics
 		capacityValueLabel.setText(Integer.toString(ticketsFile.getCapacity()));
 		checkedInValueLabel.setText(Integer.toString(ticketsFile.getCheckedIn()));
 		availableValueLabel.setText(Integer.toString(ticketsFile.getCapacity() - ticketsFile.getTicketHolders().size()));
+		
+		// Sorted list
 		switch (sortBy) {
 		case "Barcode": 
 			Arrays.sort(data, IDComparator);
@@ -350,9 +376,17 @@ public class MainFrame extends JFrame {
 		default : break;
 		}
 
+		// Set list
 		JList list = new JList(data); //data has type Object[]
 		list.setCellRenderer(new TicketHolderRenderer());
 		scrollPane.setViewportView(list);
+		
+		// Add the tickets
+		showTicketsPanel.removeAll(); // First remove any present components
+		for (TicketSort ts : ticketsFile.getTicketSorts()) {
+			TicketPanel tp = new TicketPanel(ts);
+			showTicketsPanel.add(tp);
+		}
 	}
 
 	private void showTooManyFilesErrorDialog() {
@@ -366,7 +400,7 @@ public class MainFrame extends JFrame {
 			JLabel b = (JLabel) e.getSource();
 			sortBy = b.getText();
 			if (ticketsFile != null) {
-				updateListOfTicketsAndLabels(ticketsFile.getTicketHolders().values().toArray(new TicketHolder[0]));
+				updateListOfTicketsAndLabels(ticketsFile.getTicketHolders().toArray(new TicketHolder[0]));
 			}
 		}
 
@@ -402,6 +436,25 @@ public class MainFrame extends JFrame {
 			updateListOfTicketsAndLabels(ths.toArray(new TicketHolder[0]));
 		}
 	};
+	
+	DocumentListener searchTextFieldDocumentListener = new DocumentListener() {
+
+		@Override
+		public void changedUpdate(DocumentEvent e) {		
+		}
+
+		@Override
+		public void insertUpdate(DocumentEvent e) {
+			ArrayList<TicketHolder> ths = search(searchTextField.getText());
+			updateListOfTicketsAndLabels(ths.toArray(new TicketHolder[0]));	
+		}
+
+		@Override
+		public void removeUpdate(DocumentEvent e) {
+			
+		}
+		
+	};
 
 	Comparator<TicketHolder> IDComparator = new Comparator<TicketHolder>() {
 
@@ -433,21 +486,22 @@ public class MainFrame extends JFrame {
 	private ArrayList<TicketHolder> search(String s) {
 		ArrayList<TicketHolder> l = new ArrayList<TicketHolder>();
 		switch (sortBy) {
-		case "Barcode": 
-			TicketHolder th = ticketsFile.getTicketHolders().get(s);
-			if (th != null) l.add(th);
+		case "Barcode": // Return if the search is the first part of the id
+			for (TicketHolder t : ticketsFile.getTicketHolders()) {
+				if (t.getId().startsWith(s)) {
+					l.add(t);
+				}
+			}
 			break;
-		case "Name": 
-			Collection<TicketHolder> c = ticketsFile.getTicketHolders().values();
-			for (TicketHolder t : c) {
+		case "Name": // Return if the search is contained within the name, case insensitive
+			for (TicketHolder t : ticketsFile.getTicketHolders()) {
 				if (t.getName().toLowerCase().contains(s.toLowerCase())) {
 					l.add(t);
 				}
 			}
 			break;
-		case "Email":
-			Collection<TicketHolder> col = ticketsFile.getTicketHolders().values();
-			for (TicketHolder t : col) {
+		case "Email": // Return if the search is contained within the email, case insensitive
+			for (TicketHolder t : ticketsFile.getTicketHolders()) {
 				if (t.getEmail().toLowerCase().contains(s.toLowerCase())) {
 					l.add(t);
 				}

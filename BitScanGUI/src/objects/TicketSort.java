@@ -1,8 +1,11 @@
 package objects;
 
+import java.text.DecimalFormat;
+
 public class TicketSort {
 	
 	private String ticketName;
+	private int price; // In cents and positive
 	private int capacity;
 	private int sold;
 	private int checkedIn;
@@ -12,7 +15,7 @@ public class TicketSort {
 		setTicketName(ticketName);
 	}
 	
-	public TicketSort(String ticketName, int capacity, int sold, int checkedIn, boolean doorSale) {
+	public TicketSort(String ticketName, int price, int capacity, int sold, int checkedIn, boolean doorSale) {
 		setTicketName(ticketName);
 		setCapacity(capacity);
 		setSold(sold);
@@ -58,6 +61,18 @@ public class TicketSort {
 
 	public void setCheckedIn(int checkedIn) {
 		this.checkedIn = checkedIn;
+	}
+
+	public int getPrice() {
+		return price;
+	}
+
+	public void setPrice(int price) {
+		this.price = price;
+	}
+	
+	public String getPriceRepresentation() {
+		return "€" + price / 100 + "," + String.format("%03d", price % 100);
 	}
 
 }
