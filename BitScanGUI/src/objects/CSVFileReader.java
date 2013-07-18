@@ -73,7 +73,7 @@ public class CSVFileReader {
 			int sold = Integer.parseInt(items[2]);
 			int checkedIn = Integer.parseInt(items[3]);
 			boolean doorSale = convertStringtoBoolean(items[4]);
-			int price = (int) Double.parseDouble(items[5]) * 100;
+			int price = (int) (Double.parseDouble(items[5]) * 100);
 
 			TicketSort ts = new TicketSort(ticketName, price, capacity, sold, checkedIn, doorSale);
 			ticketSorts.add(ts);

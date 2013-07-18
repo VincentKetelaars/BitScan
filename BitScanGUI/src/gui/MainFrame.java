@@ -7,6 +7,7 @@ import java.awt.FlowLayout;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.GridLayout;
+import java.awt.Rectangle;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
@@ -66,6 +67,9 @@ public class MainFrame extends JFrame {
 	private JLabel availableValueLabel;
 
 	private String sortBy = "Barcode";
+	
+	private ArrayList<TicketPanel> ticketPanels;
+	private JLabel totalCostLabel;
 
 	/**
 	 * Create the frame. Determine basic settings. Initiate build of the main layout.
@@ -194,12 +198,6 @@ public class MainFrame extends JFrame {
 		buttonFlowPanel.setBackground(Constants.BACKGROUND_COLOR);
 		buttonFlowPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
 
-		BufferedImage stopPicture = null;
-		try {
-			stopPicture = ImageIO.read(new File(Constants.WHITE_BACKGROUND));
-		} catch (IOException ex) { }
-		JLabel picLabel = new JLabel(new ImageIcon( stopPicture ));
-
 		JLabel barcodeButton = new JLabel("Barcode");
 		barcodeButton.setFont(Constants.HEADER_FONT);
 		barcodeButton.setBorder(Constants.SORT_BUTTON_BORDER);
@@ -316,13 +314,14 @@ public class MainFrame extends JFrame {
 		JPanel purchaseTicketsPanel = new JPanel();
 		purchaseTicketsPanel.setBorder(new EmptyBorder(10, 0, 0, 0));
 		purchaseTicketsPanel.setBackground(Constants.BACKGROUND_COLOR);
-		purchaseTicketsPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
 		buyTicketPanel.add(purchaseTicketsPanel, BorderLayout.SOUTH);
+		purchaseTicketsPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
 		
 		JButton purchaseTicketsButton = new JButton("Purchase Tickets");
 		purchaseTicketsPanel.add(purchaseTicketsButton);
 		
-		JLabel totalCostLabel = new JLabel("0");
+		totalCostLabel = new JLabel("0");
+		totalCostLabel.setBorder(new EmptyBorder(0, 45, 0, 0));
 		purchaseTicketsPanel.add(totalCostLabel);
 		
 		return buyTicketPanel;
@@ -383,8 +382,10 @@ public class MainFrame extends JFrame {
 		
 		// Add the tickets
 		showTicketsPanel.removeAll(); // First remove any present components
+		ticketPanels = new ArrayList<TicketPanel>();
 		for (TicketSort ts : ticketsFile.getTicketSorts()) {
 			TicketPanel tp = new TicketPanel(ts);
+			ticketPanels.add(tp);
 			showTicketsPanel.add(tp);
 		}
 	}

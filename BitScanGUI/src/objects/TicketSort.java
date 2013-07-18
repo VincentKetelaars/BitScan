@@ -1,6 +1,5 @@
 package objects;
 
-import java.text.DecimalFormat;
 
 public class TicketSort {
 	
@@ -17,6 +16,7 @@ public class TicketSort {
 	
 	public TicketSort(String ticketName, int price, int capacity, int sold, int checkedIn, boolean doorSale) {
 		setTicketName(ticketName);
+		setPrice(price);
 		setCapacity(capacity);
 		setSold(sold);
 		setCheckedIn(checkedIn);
@@ -72,7 +72,7 @@ public class TicketSort {
 	}
 	
 	public String getPriceRepresentation() {
-		return "€" + price / 100 + "," + String.format("%03d", price % 100);
+		return "€" + price / 100 + "," + String.format("%02d", price % 100);
 	}
 
 }
