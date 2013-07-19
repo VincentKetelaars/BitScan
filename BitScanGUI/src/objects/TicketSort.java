@@ -1,5 +1,7 @@
 package objects;
 
+import constants.GeneralMethods;
+
 
 public class TicketSort {
 	
@@ -72,7 +74,7 @@ public class TicketSort {
 	}
 	
 	public String getPriceRepresentation() {
-		return "€" + price / 100 + "," + String.format("%02d", price % 100);
+		return GeneralMethods.convertPriceIntToString(price);
 	}
 
 }

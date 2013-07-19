@@ -7,7 +7,6 @@ import java.awt.FlowLayout;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.GridLayout;
-import java.awt.Rectangle;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
@@ -17,17 +16,13 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-import javax.imageio.ImageIO;
 import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
@@ -53,6 +48,7 @@ import objects.TicketPanel;
 import objects.TicketSort;
 import objects.TicketsFile;
 import constants.Constants;
+import constants.GeneralMethods;
 
 public class MainFrame extends JFrame {
 
@@ -320,7 +316,7 @@ public class MainFrame extends JFrame {
 		JButton purchaseTicketsButton = new JButton("Purchase Tickets");
 		purchaseTicketsPanel.add(purchaseTicketsButton);
 		
-		totalCostLabel = new JLabel("0");
+		totalCostLabel = new JLabel(GeneralMethods.convertPriceIntToString(0));
 		totalCostLabel.setBorder(new EmptyBorder(0, 45, 0, 0));
 		purchaseTicketsPanel.add(totalCostLabel);
 		
@@ -385,6 +381,7 @@ public class MainFrame extends JFrame {
 		ticketPanels = new ArrayList<TicketPanel>();
 		for (TicketSort ts : ticketsFile.getTicketSorts()) {
 			TicketPanel tp = new TicketPanel(ts);
+			tp.setDocumentListener(numberTicketsDocumentListener);
 			ticketPanels.add(tp);
 			showTicketsPanel.add(tp);
 		}
@@ -484,6 +481,7 @@ public class MainFrame extends JFrame {
 
 	};
 
+
 	private ArrayList<TicketHolder> search(String s) {
 		ArrayList<TicketHolder> l = new ArrayList<TicketHolder>();
 		switch (sortBy) {
@@ -513,5 +511,32 @@ public class MainFrame extends JFrame {
 		}
 		return l;
 	}
+	
+	DocumentListener numberTicketsDocumentListener = new DocumentListener() {
+		
+		@Override
+		public void removeUpdate(DocumentEvent arg0) {
+			int total = 0;
+			for (TicketPanel tp : ticketPanels) {
+				total += tp.numberOfTickets() * tp.getTicketSort().getPrice();
+			}
+			totalCostLabel.setText(GeneralMethods.convertPriceIntToString(total));
+		}
+		
+		@Override
+		public void insertUpdate(DocumentEvent arg0) {
+			int total = 0;
+			for (TicketPanel tp : ticketPanels) {
+				total += tp.numberOfTickets() * tp.getTicketSort().getPrice();
+			}
+			totalCostLabel.setText(GeneralMethods.convertPriceIntToString(total));
+		}
+		
+		@Override
+		public void changedUpdate(DocumentEvent arg0) {
+			// TODO Auto-generated method stub
+			
+		}
+	};
 
 }

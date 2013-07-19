@@ -3,13 +3,13 @@ package objects;
 import java.awt.Component;
 import java.awt.Rectangle;
 import java.text.NumberFormat;
+import java.text.ParseException;
 
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.MaskFormatter;
 
 import constants.Constants;
 
@@ -19,7 +19,7 @@ public class TicketPanel extends JPanel {
 	private JFormattedTextField amountTextField;
 
 	public TicketPanel(TicketSort ticketSort) {
-		this.ticketSort = ticketSort;
+		this.setTicketSort(ticketSort);
 
 		createPanel();
 	}
@@ -28,15 +28,15 @@ public class TicketPanel extends JPanel {
 		setBackground(Constants.BACKGROUND_COLOR);
 		setLayout(null);
 
-		JLabel nameLabel = new JLabel(ticketSort.getTicketName());
+		JLabel nameLabel = new JLabel(getTicketSort().getTicketName());
 		nameLabel.setBounds(0, 11, 103, 22);
 		add(nameLabel);
 
-		JLabel priceLabel = new JLabel(ticketSort.getPriceRepresentation());
+		JLabel priceLabel = new JLabel(getTicketSort().getPriceRepresentation());
 		priceLabel.setBounds(new Rectangle(182, 11, 71, 22));
 		add(priceLabel);
 
-		JLabel availabilityLabel = new JLabel(ticketSort.getCapacity() - ticketSort.getSold()+" / "+ticketSort.getCapacity());
+		JLabel availabilityLabel = new JLabel(getTicketSort().getCapacity() - getTicketSort().getSold()+" / "+getTicketSort().getCapacity());
 		availabilityLabel.setBounds(new Rectangle(309, 11, 55, 22));
 		add(availabilityLabel);
 
@@ -44,26 +44,28 @@ public class TicketPanel extends JPanel {
 		amountTextField.setBounds(393, 11, 29, 22);
 		amountTextField.setAlignmentX(Component.RIGHT_ALIGNMENT);
 		amountTextField.setColumns(2);
-		amountTextField.getDocument().addDocumentListener(new DocumentListener() {
-			
-			@Override
-			public void removeUpdate(DocumentEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void insertUpdate(DocumentEvent arg0) {
-				int n = Integer.parseInt(amountTextField.getText());
-			}
-			
-			@Override
-			public void changedUpdate(DocumentEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-		});
+
 		add(amountTextField);
+	}
+	
+	public void setDocumentListener(DocumentListener dl) {
+		amountTextField.getDocument().addDocumentListener(dl);
+	}
+	
+	public int numberOfTickets() {
+		try {
+			return Integer.parseInt(amountTextField.getText());
+		} catch (NumberFormatException e) {
+			return 0;
+		}
+	}
+
+	public TicketSort getTicketSort() {
+		return ticketSort;
+	}
+
+	public void setTicketSort(TicketSort ticketSort) {
+		this.ticketSort = ticketSort;
 	}
 
 }
