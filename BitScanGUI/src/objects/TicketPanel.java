@@ -2,21 +2,19 @@ package objects;
 
 import java.awt.Component;
 import java.awt.Rectangle;
-import java.text.NumberFormat;
-import java.text.ParseException;
 
-import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.event.DocumentListener;
-import javax.swing.text.MaskFormatter;
+import javax.swing.text.AbstractDocument;
 
 import constants.Constants;
 
 public class TicketPanel extends JPanel {
 
 	private TicketSort ticketSort;
-	private JFormattedTextField amountTextField;
+	private JTextField amountTextField;
 
 	public TicketPanel(TicketSort ticketSort) {
 		this.setTicketSort(ticketSort);
@@ -40,10 +38,10 @@ public class TicketPanel extends JPanel {
 		availabilityLabel.setBounds(new Rectangle(309, 11, 55, 22));
 		add(availabilityLabel);
 
-		amountTextField = new JFormattedTextField(NumberFormat.getInstance());
+		amountTextField = new JTextField(3);
 		amountTextField.setBounds(393, 11, 29, 22);
 		amountTextField.setAlignmentX(Component.RIGHT_ALIGNMENT);
-		amountTextField.setColumns(2);
+		((AbstractDocument) amountTextField.getDocument()).setDocumentFilter(new DigitsDocumentFilter());
 
 		add(amountTextField);
 	}
