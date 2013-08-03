@@ -1,6 +1,7 @@
 package gui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -43,8 +44,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import objects.CSVFileReader;
 import objects.TicketHolder;
-import objects.TicketHolderRenderer;
-import objects.TicketPanel;
 import objects.TicketSort;
 import objects.TicketsFile;
 import constants.Constants;
@@ -61,11 +60,12 @@ public class MainFrame extends JFrame {
 	private JLabel capacityValueLabel;
 	private JLabel checkedInValueLabel;
 	private JLabel availableValueLabel;
+	private JLabel totalCostLabel;
+	private JLabel eventDateLabel;
 
 	private String sortBy = "Barcode";
 	
 	private ArrayList<TicketPanel> ticketPanels;
-	private JLabel totalCostLabel;
 
 	/**
 	 * Create the frame. Determine basic settings. Initiate build of the main layout.
@@ -98,6 +98,8 @@ public class MainFrame extends JFrame {
 		contentPane.setLayout(new BorderLayout(0, 0));
 
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		tabbedPane.setMinimumSize(new Dimension(780, 540));
+		tabbedPane.setMaximumSize(new Dimension(780, 1080));
 		tabbedPane.setBackground(Constants.BACKGROUND_COLOR);
 		contentPane.add(tabbedPane);
 
@@ -121,6 +123,12 @@ public class MainFrame extends JFrame {
 		eventTitleLabel = new JLabel("Event");
 		eventTitleLabel.setFont(Constants.TITLE_FONT);
 		titlePanel.add(eventTitleLabel);
+		
+		eventDateLabel = new JLabel();
+		eventDateLabel.setFont(Constants.TITLE_FONT);
+		eventDateLabel.setForeground(Color.GRAY);
+		eventDateLabel.setBorder(new EmptyBorder(0, -3, 0, 0));
+		titlePanel.add(eventDateLabel);
 
 		JPanel entranceCenterPanel = new JPanel();
 		entranceTab.add(entranceCenterPanel, BorderLayout.CENTER);
@@ -351,6 +359,7 @@ public class MainFrame extends JFrame {
 
 	private void updateListOfTicketsAndLabels(TicketHolder[] data) {
 		eventTitleLabel.setText(ticketsFile.getEventName()); // Event label
+		eventDateLabel.setText(", " + ticketsFile.getStartDate().toString("dd MMMM yyyy"));
 		
 		// Statistics
 		capacityValueLabel.setText(Integer.toString(ticketsFile.getCapacity()));

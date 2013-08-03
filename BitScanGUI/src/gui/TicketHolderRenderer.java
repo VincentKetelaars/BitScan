@@ -1,4 +1,4 @@
-package objects;
+package gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -19,6 +19,7 @@ import javax.swing.JPanel;
 import javax.swing.ListCellRenderer;
 import javax.swing.border.EmptyBorder;
 
+import objects.TicketHolder;
 import constants.Constants;
 
 import java.awt.Cursor;

@@ -1,4 +1,4 @@
-package objects;
+package gui;
 
 import java.awt.Component;
 import java.awt.Rectangle;
@@ -9,6 +9,8 @@ import javax.swing.JTextField;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.AbstractDocument;
 
+import objects.DigitsDocumentFilter;
+import objects.TicketSort;
 import constants.Constants;
 
 public class TicketPanel extends JPanel {
