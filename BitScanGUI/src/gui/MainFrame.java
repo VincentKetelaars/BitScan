@@ -46,6 +46,9 @@ import objects.CSVFileReader;
 import objects.TicketHolder;
 import objects.TicketSort;
 import objects.TicketsFile;
+
+import org.joda.time.DateTime;
+
 import constants.Constants;
 import constants.GeneralMethods;
 
@@ -64,7 +67,7 @@ public class MainFrame extends JFrame {
 	private JLabel eventDateLabel;
 
 	private String sortBy = "Barcode";
-	
+
 	private ArrayList<TicketPanel> ticketPanels;
 
 	/**
@@ -123,7 +126,7 @@ public class MainFrame extends JFrame {
 		eventTitleLabel = new JLabel("Event");
 		eventTitleLabel.setFont(Constants.TITLE_FONT);
 		titlePanel.add(eventTitleLabel);
-		
+
 		eventDateLabel = new JLabel();
 		eventDateLabel.setFont(Constants.TITLE_FONT);
 		eventDateLabel.setForeground(Color.GRAY);
@@ -243,9 +246,9 @@ public class MainFrame extends JFrame {
 		loadPanel.add(loadButton);
 
 		rightPanel.add(createStatisticsPanel());	
-		
+
 		rightPanel.add(createBuyTicketPanel());
-		
+
 		return rightPanel;
 	}
 
@@ -296,38 +299,38 @@ public class MainFrame extends JFrame {
 		availableValueLabel.setAlignmentX(Component.RIGHT_ALIGNMENT);
 		availableValueLabel.setBorder(Constants.STATISTICS_LABEL_BORDER);
 		statisticsValuePanel.add(availableValueLabel);
-		
+
 		return statisticsPanel;
 	}
-	
+
 	private Component createBuyTicketPanel() {
 		JPanel buyTicketPanel = new JPanel();
 		buyTicketPanel.setBackground(Constants.BACKGROUND_COLOR);
 		buyTicketPanel.setLayout(new BorderLayout(0, 0));
 		buyTicketPanel.setBorder(new EmptyBorder(0, Constants.RIGHT_PANEL_SIDE_MARGIN, 0, Constants.RIGHT_PANEL_SIDE_MARGIN));
-		
+
 		JLabel purchaseTicketLabel = new JLabel("Purchase Ticket");
 		buyTicketPanel.add(purchaseTicketLabel, BorderLayout.NORTH);
 		purchaseTicketLabel.setFont(Constants.HEADER_FONT);
-		
+
 		showTicketsPanel = new JPanel();
 		showTicketsPanel.setBackground(Constants.BACKGROUND_COLOR);
 		showTicketsPanel.setLayout(new BoxLayout(showTicketsPanel, BoxLayout.Y_AXIS));
 		buyTicketPanel.add(showTicketsPanel, BorderLayout.CENTER);
-		
+
 		JPanel purchaseTicketsPanel = new JPanel();
 		purchaseTicketsPanel.setBorder(new EmptyBorder(10, 0, 0, 0));
 		purchaseTicketsPanel.setBackground(Constants.BACKGROUND_COLOR);
 		buyTicketPanel.add(purchaseTicketsPanel, BorderLayout.SOUTH);
 		purchaseTicketsPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
-		
+
 		JButton purchaseTicketsButton = new JButton("Purchase Tickets");
 		purchaseTicketsPanel.add(purchaseTicketsButton);
-		
+
 		totalCostLabel = new JLabel(GeneralMethods.convertPriceIntToString(0));
 		totalCostLabel.setBorder(new EmptyBorder(0, 45, 0, 0));
 		purchaseTicketsPanel.add(totalCostLabel);
-		
+
 		return buyTicketPanel;
 	}
 
@@ -360,12 +363,12 @@ public class MainFrame extends JFrame {
 	private void updateListOfTicketsAndLabels(TicketHolder[] data) {
 		eventTitleLabel.setText(ticketsFile.getEventName()); // Event label
 		eventDateLabel.setText(", " + ticketsFile.getStartDate().toString("dd MMMM yyyy"));
-		
+
 		// Statistics
 		capacityValueLabel.setText(Integer.toString(ticketsFile.getCapacity()));
 		checkedInValueLabel.setText(Integer.toString(ticketsFile.getCheckedIn()));
 		availableValueLabel.setText(Integer.toString(ticketsFile.getCapacity() - ticketsFile.getTicketHolders().size()));
-		
+
 		// Sorted list
 		switch (sortBy) {
 		case "Barcode": 
@@ -384,7 +387,7 @@ public class MainFrame extends JFrame {
 		JList list = new JList(data); //data has type Object[]
 		list.setCellRenderer(new TicketHolderRenderer());
 		scrollPane.setViewportView(list);
-		
+
 		// Add the tickets
 		showTicketsPanel.removeAll(); // First remove any present components
 		ticketPanels = new ArrayList<TicketPanel>();
@@ -440,10 +443,14 @@ public class MainFrame extends JFrame {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			ArrayList<TicketHolder> ths = search(searchTextField.getText());
-			updateListOfTicketsAndLabels(ths.toArray(new TicketHolder[0]));
+			if (ths.size() == 1) {
+				singleResultFound(ths.get(0));
+			} else {
+				updateListOfTicketsAndLabels(ths.toArray(new TicketHolder[0]));
+			}
 		}
 	};
-	
+
 	DocumentListener searchTextFieldDocumentListener = new DocumentListener() {
 
 		@Override
@@ -458,9 +465,9 @@ public class MainFrame extends JFrame {
 
 		@Override
 		public void removeUpdate(DocumentEvent e) {
-			
+
 		}
-		
+
 	};
 
 	Comparator<TicketHolder> IDComparator = new Comparator<TicketHolder>() {
@@ -520,9 +527,18 @@ public class MainFrame extends JFrame {
 		}
 		return l;
 	}
-	
+
+	protected void singleResultFound(TicketHolder ticketHolder) {
+		if (ticketHolder.getDateTime() == null) {
+			ticketHolder.setDateTime(DateTime.now());
+		} else {
+			// This ticket has already been checked!
+		}
+		updateListOfTicketsAndLabels(new TicketHolder[]{ticketHolder});
+	}
+
 	DocumentListener numberTicketsDocumentListener = new DocumentListener() {
-		
+
 		@Override
 		public void removeUpdate(DocumentEvent arg0) {
 			int total = 0;
@@ -531,7 +547,7 @@ public class MainFrame extends JFrame {
 			}
 			totalCostLabel.setText(GeneralMethods.convertPriceIntToString(total));
 		}
-		
+
 		@Override
 		public void insertUpdate(DocumentEvent arg0) {
 			int total = 0;
@@ -540,11 +556,11 @@ public class MainFrame extends JFrame {
 			}
 			totalCostLabel.setText(GeneralMethods.convertPriceIntToString(total));
 		}
-		
+
 		@Override
 		public void changedUpdate(DocumentEvent arg0) {
 			// TODO Auto-generated method stub
-			
+
 		}
 	};
 

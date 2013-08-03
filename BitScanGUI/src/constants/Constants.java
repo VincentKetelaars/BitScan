@@ -41,6 +41,8 @@ public class Constants {
 	
 	// Files
 	public static final String GREEN_BAR = "images/green-bar.gif";	
+	public static final String GRAY_BAR = "images/gray-bar.png";	
+	public static final String RED_BAR = "images/red-bar.png";	
 	
 	// Messages
 	public static final String LOAD_FILE_ERROR_MESSAGE = "This file can not be imported!";
