@@ -44,6 +44,7 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import objects.CSVFileReader;
+import objects.CSVFileWriter;
 import objects.TicketHolder;
 import objects.TicketSort;
 import objects.TicketsFile;
@@ -71,6 +72,7 @@ public class MainFrame extends JFrame {
 
 	private ArrayList<TicketPanel> ticketPanels;
 	private JButton searchButton;
+	private CSVFileWriter csvFileWriter;
 
 	/**
 	 * Create the frame. Determine basic settings. Initiate build of the main layout.
@@ -316,7 +318,7 @@ public class MainFrame extends JFrame {
 		JButton purchaseTicketsButton = new JButton("Purchase Tickets");
 		purchaseTicketsPanel.add(purchaseTicketsButton);
 
-		totalCostLabel = new JLabel(GeneralMethods.convertPriceIntToString(0));
+		totalCostLabel = new JLabel(GeneralMethods.convertPriceIntToEuroString(0));
 		totalCostLabel.setBorder(new EmptyBorder(0, 45, 0, 0));
 		purchaseTicketsPanel.add(totalCostLabel);
 
@@ -342,11 +344,17 @@ public class MainFrame extends JFrame {
 			@Override
 			public void run() {
 				ticketsFile = csv.read();
-				if (ticketsFile != null)
-					updateListOfTicketsAndLabels(ticketsFile.getTicketHolders().toArray(new TicketHolder[0]));			
+				if (ticketsFile != null) {
+					updateListOfTicketsAndLabels(ticketsFile.getTicketHolders().toArray(new TicketHolder[0]));
+					startCSVFileWriter();
+				}
 			}
 		};
 		r.run();
+	}
+
+	private void startCSVFileWriter() {
+		csvFileWriter = new CSVFileWriter(ticketsFile);
 	}
 
 	private void updateListOfTicketsAndLabels(TicketHolder[] data) {
@@ -373,7 +381,7 @@ public class MainFrame extends JFrame {
 		}
 
 		// Set list
-		JList list = new JList(data); //data has type Object[]
+		JList list = new JList(data);
 		list.setCellRenderer(new TicketHolderRenderer());
 		scrollPane.setViewportView(list);
 
@@ -441,13 +449,13 @@ public class MainFrame extends JFrame {
 			}
 		}
 	};
-	
+
 	KeyListener searchTextFieldActionListener = new KeyListener() {
 
 		@Override
 		public void keyPressed(KeyEvent e) {
 			// TODO Auto-generated method stub
-			
+
 		}
 
 		@Override
@@ -460,7 +468,7 @@ public class MainFrame extends JFrame {
 		@Override
 		public void keyTyped(KeyEvent e) {
 			// TODO Auto-generated method stub
-			
+
 		}
 	};
 
@@ -550,20 +558,21 @@ public class MainFrame extends JFrame {
 			ticketHolder.setDateTime(DateTime.now());
 			final GreenNotification notification = new GreenNotification((JFrame) this, ticketHolder);
 			new Thread(){
-			      @Override
-			      public void run() {
-			           try {
-			                  Thread.sleep(3000); // time after which pop up will disappear
-			                  notification.dispose();
-			           } catch (InterruptedException e) {
-			                  e.printStackTrace();
-			           }
-			      };
+				@Override
+				public void run() {
+					try {
+						Thread.sleep(3000); // time after which pop up will disappear
+						notification.dispose();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				};
 			}.start();
 		} else {
 			// This ticket has already been checked!
 		}
 		updateListOfTicketsAndLabels(new TicketHolder[]{ticketHolder});
+		csvFileWriter.update(ticketsFile);
 	}
 
 	DocumentListener numberTicketsDocumentListener = new DocumentListener() {
@@ -574,7 +583,7 @@ public class MainFrame extends JFrame {
 			for (TicketPanel tp : ticketPanels) {
 				total += tp.numberOfTickets() * tp.getTicketSort().getPrice();
 			}
-			totalCostLabel.setText(GeneralMethods.convertPriceIntToString(total));
+			totalCostLabel.setText(GeneralMethods.convertPriceIntToEuroString(total));
 		}
 
 		@Override
@@ -583,7 +592,7 @@ public class MainFrame extends JFrame {
 			for (TicketPanel tp : ticketPanels) {
 				total += tp.numberOfTickets() * tp.getTicketSort().getPrice();
 			}
-			totalCostLabel.setText(GeneralMethods.convertPriceIntToString(total));
+			totalCostLabel.setText(GeneralMethods.convertPriceIntToEuroString(total));
 		}
 
 		@Override
@@ -592,7 +601,7 @@ public class MainFrame extends JFrame {
 
 		}
 	};
-	
+
 	DropTarget csvFileDropTarget = new DropTarget() {
 		public synchronized void drop(DropTargetDropEvent evt) {
 			try {

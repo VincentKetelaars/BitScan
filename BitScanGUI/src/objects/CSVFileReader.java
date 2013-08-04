@@ -50,7 +50,7 @@ public class CSVFileReader {
 
 		BufferedReader reader = Files.newBufferedReader(file.toPath(), ENCODING);
 		String line = reader.readLine();
-		if (!line.contains(Constants.identifierCSV)) {// Should be equals!!!
+		if (line == null || !line.contains(Constants.identifierCSV)) {// Should be equals!!!
 			showErrorDialog();
 			return null;
 		}
@@ -86,6 +86,8 @@ public class CSVFileReader {
 				ticketHolders.add(th);
 			}
 		}
+		
+		reader.close();
 
 		tf.setTicketHolders(ticketHolders);
 		tf.setEventName(eventName);
@@ -136,7 +138,7 @@ public class CSVFileReader {
 		int hour = Integer.parseInt(items[3]);
 		int minute = Integer.parseInt(items[4]);
 		int second = Integer.parseInt(items[5]);
-		if (year == 0 && month == 0 && day == 0 && hour == 0 && minute == 0 && second == 0) {
+		if (year == 0 || month == 0 || day == 0) {
 			return null;
 		}
 		DateTime dt = new DateTime(year, month, day, hour, minute, second);

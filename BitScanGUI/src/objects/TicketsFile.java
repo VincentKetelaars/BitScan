@@ -8,6 +8,9 @@ import java.util.Map.Entry;
 
 import org.joda.time.DateTime;
 
+import constants.Constants;
+import constants.GeneralMethods;
+
 public class TicketsFile {
 	
 	private File file;
@@ -33,7 +36,7 @@ public class TicketsFile {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("TicketFile {\n");
-		sb.append("file : "+ file.toPath().toString() +"\n");
+		sb.append("file : "+ getFile().toPath().toString() +"\n");
 		sb.append("ticket holders {\n");
 		
 		// Iterate over all TicketHolders
@@ -99,5 +102,24 @@ public class TicketsFile {
 
 	public void setTicketSorts(ArrayList<TicketSort> ticketSorts) {
 		this.ticketSorts = ticketSorts;
+	}
+
+	public File getFile() {
+		return file;
+	}
+	
+	public String toCSVOutput() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(eventName+","+eventDescription+","+GeneralMethods.dateTimeToString(startDate)+","+
+					GeneralMethods.dateTimeToString(endDate)+","+ticketSorts.size()+System.lineSeparator());
+		for (TicketSort ts : ticketSorts) {
+			sb.append(ts.getTicketName()+","+ts.getCapacity()+","+ts.getSold()+","+ts.getCheckedIn()+","+ts.isDoorSale()+","+
+					GeneralMethods.convertPriceIntToString(ts.getPrice())+System.lineSeparator());
+		}
+		for (TicketHolder th : ticketHolders) {
+			sb.append(th.getTable()+","+th.getId()+","+th.getComment()+","+GeneralMethods.dateTimeToString(th.getDateTime())+","+
+					th.getName()+","+th.getEmail()+","+th.getTicketSort().getTicketName()+System.lineSeparator());
+		}
+		return sb.toString();
 	}
 }

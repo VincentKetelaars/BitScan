@@ -74,7 +74,7 @@ public class TicketSort {
 	}
 	
 	public String getPriceRepresentation() {
-		return GeneralMethods.convertPriceIntToString(price);
+		return GeneralMethods.convertPriceIntToEuroString(price);
 	}
 
 }
