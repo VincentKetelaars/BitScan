@@ -15,6 +15,7 @@ import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
@@ -69,6 +70,7 @@ public class MainFrame extends JFrame {
 	private String sortBy = "Barcode";
 
 	private ArrayList<TicketPanel> ticketPanels;
+	private JButton searchButton;
 
 	/**
 	 * Create the frame. Determine basic settings. Initiate build of the main layout.
@@ -151,22 +153,7 @@ public class MainFrame extends JFrame {
 		leftPanel.add(createSearchByPanel());
 
 		scrollPane = new JScrollPane();
-		scrollPane.setDropTarget(new DropTarget() {
-			public synchronized void drop(DropTargetDropEvent evt) {
-				try {
-					evt.acceptDrop(DnDConstants.ACTION_COPY);
-					List<File> droppedFiles = (List<File>) evt.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
-
-					if (droppedFiles.size() > 1) {
-						showTooManyFilesErrorDialog();
-					}
-
-					runCSVReader(droppedFiles.get(0));
-				} catch (Exception ex) {
-					ex.printStackTrace();
-				}
-			}
-		});
+		scrollPane.setDropTarget(csvFileDropTarget);
 		scrollPane.setBorder(new EmptyBorder(5,5,5,5));
 		scrollPane.setBackground(Constants.BACKGROUND_COLOR);
 		scrollPane.setPreferredSize(new Dimension(800, 1000));
@@ -191,9 +178,10 @@ public class MainFrame extends JFrame {
 		searchTextField = new JTextField();
 		searchTextField.setColumns(20);
 		searchTextField.getDocument().addDocumentListener(searchTextFieldDocumentListener);
+		searchTextField.addKeyListener(searchTextFieldActionListener);
 		searchPanel.add(searchTextField);	
 
-		JButton searchButton = new JButton("Search");
+		searchButton = new JButton("Search");
 		searchButton.addActionListener(searchButtonActionListener);
 		searchPanel.add(searchButton);
 
@@ -243,6 +231,7 @@ public class MainFrame extends JFrame {
 				openFileChooser();
 			}
 		});
+		loadPanel.setDropTarget(csvFileDropTarget);
 		loadPanel.add(loadButton);
 
 		rightPanel.add(createStatisticsPanel());	
@@ -443,11 +432,35 @@ public class MainFrame extends JFrame {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			ArrayList<TicketHolder> ths = search(searchTextField.getText());
-			if (ths.size() == 1) {
-				singleResultFound(ths.get(0));
+			if (ths == null) {
+				return;
+			} else if (ths.size() == 1) {
+				singleTicketFound(ths.get(0));
 			} else {
 				updateListOfTicketsAndLabels(ths.toArray(new TicketHolder[0]));
 			}
+		}
+	};
+	
+	KeyListener searchTextFieldActionListener = new KeyListener() {
+
+		@Override
+		public void keyPressed(KeyEvent e) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void keyReleased(KeyEvent e) {
+			if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+				searchButton.doClick();
+			}
+		}
+
+		@Override
+		public void keyTyped(KeyEvent e) {
+			// TODO Auto-generated method stub
+			
 		}
 	};
 
@@ -460,6 +473,8 @@ public class MainFrame extends JFrame {
 		@Override
 		public void insertUpdate(DocumentEvent e) {
 			ArrayList<TicketHolder> ths = search(searchTextField.getText());
+			if (ths == null)
+				return;
 			updateListOfTicketsAndLabels(ths.toArray(new TicketHolder[0]));	
 		}
 
@@ -499,6 +514,8 @@ public class MainFrame extends JFrame {
 
 
 	private ArrayList<TicketHolder> search(String s) {
+		if (ticketsFile == null || ticketsFile.getTicketHolders() == null)
+			return null;
 		ArrayList<TicketHolder> l = new ArrayList<TicketHolder>();
 		switch (sortBy) {
 		case "Barcode": // Return if the search is the first part of the id
@@ -528,9 +545,21 @@ public class MainFrame extends JFrame {
 		return l;
 	}
 
-	protected void singleResultFound(TicketHolder ticketHolder) {
+	protected void singleTicketFound(TicketHolder ticketHolder) {
 		if (ticketHolder.getDateTime() == null) {
 			ticketHolder.setDateTime(DateTime.now());
+			final GreenNotification notification = new GreenNotification((JFrame) this, ticketHolder);
+			new Thread(){
+			      @Override
+			      public void run() {
+			           try {
+			                  Thread.sleep(3000); // time after which pop up will disappear
+			                  notification.dispose();
+			           } catch (InterruptedException e) {
+			                  e.printStackTrace();
+			           }
+			      };
+			}.start();
 		} else {
 			// This ticket has already been checked!
 		}
@@ -561,6 +590,23 @@ public class MainFrame extends JFrame {
 		public void changedUpdate(DocumentEvent arg0) {
 			// TODO Auto-generated method stub
 
+		}
+	};
+	
+	DropTarget csvFileDropTarget = new DropTarget() {
+		public synchronized void drop(DropTargetDropEvent evt) {
+			try {
+				evt.acceptDrop(DnDConstants.ACTION_COPY);
+				List<File> droppedFiles = (List<File>) evt.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+
+				if (droppedFiles.size() > 1) {
+					showTooManyFilesErrorDialog();
+				}
+
+				runCSVReader(droppedFiles.get(0));
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
 		}
 	};
 
