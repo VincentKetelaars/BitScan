@@ -95,6 +95,14 @@ public class TicketHolder {
 		this.email = email;
 	}
 
+	public TicketSort getTicketSort() {
+		return ticketSort;
+	}
+
+	public void setTicketSort(TicketSort ticketSort) {
+		this.ticketSort = ticketSort;
+	}
+
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("TicketHolder {\n");
@@ -108,13 +116,12 @@ public class TicketHolder {
 		sb.append("};");
 		return sb.toString();
 	}
-
-	public TicketSort getTicketSort() {
-		return ticketSort;
-	}
-
-	public void setTicketSort(TicketSort ticketSort) {
-		this.ticketSort = ticketSort;
+	
+	/**
+	 * Updates the DateTime
+	 */
+	public void checkIn() {
+		setDateTime(DateTime.now());
 	}
 
 }

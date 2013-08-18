@@ -113,13 +113,21 @@ public class TicketsFile {
 		sb.append(eventName+","+eventDescription+","+GeneralMethods.dateTimeToString(startDate)+","+
 					GeneralMethods.dateTimeToString(endDate)+","+ticketSorts.size()+System.lineSeparator());
 		for (TicketSort ts : ticketSorts) {
-			sb.append(ts.getTicketName()+","+ts.getCapacity()+","+ts.getSold()+","+ts.getCheckedIn()+","+ts.isDoorSale()+","+
+			sb.append(ts.getName()+","+ts.getCapacity()+","+ts.getSold()+","+ts.getCheckedIn()+","+ts.isDoorSale()+","+
 					GeneralMethods.convertPriceIntToString(ts.getPrice())+System.lineSeparator());
 		}
 		for (TicketHolder th : ticketHolders) {
 			sb.append(th.getTable()+","+th.getId()+","+th.getComment()+","+GeneralMethods.dateTimeToString(th.getDateTime())+","+
-					th.getName()+","+th.getEmail()+","+th.getTicketSort().getTicketName()+System.lineSeparator());
+					th.getName()+","+th.getEmail()+","+th.getTicketSort().getName()+System.lineSeparator());
 		}
 		return sb.toString();
+	}
+	
+	public void singleCheckIn(TicketSort ticketSort) {
+		for (TicketSort ts : ticketSorts) {
+			if (ts.getName().equals(ticketSort.getName())) {
+				ts.singleCheckIn();
+			}
+		}
 	}
 }

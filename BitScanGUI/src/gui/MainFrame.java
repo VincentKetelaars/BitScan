@@ -320,6 +320,7 @@ public class MainFrame extends JFrame {
 		purchaseTicketsPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
 
 		JButton purchaseTicketsButton = new JButton("Purchase Tickets");
+		purchaseTicketsButton.addActionListener(addTicketButtonListener);
 		purchaseTicketsPanel.add(purchaseTicketsButton);
 
 		totalCostLabel = new JLabel(GeneralMethods.convertPriceIntToEuroString(0));
@@ -416,28 +417,16 @@ public class MainFrame extends JFrame {
 		}
 
 		@Override
-		public void mousePressed(MouseEvent e) {
-			// TODO Auto-generated method stub
-
-		}
+		public void mousePressed(MouseEvent e) {}
 
 		@Override
-		public void mouseExited(MouseEvent e) {
-			// TODO Auto-generated method stub
-
-		}
+		public void mouseExited(MouseEvent e) {}
 
 		@Override
-		public void mouseEntered(MouseEvent e) {
-			// TODO Auto-generated method stub
-
-		}
+		public void mouseEntered(MouseEvent e) {}
 
 		@Override
-		public void mouseClicked(MouseEvent e) {
-			// TODO Auto-generated method stub
-
-		}
+		public void mouseClicked(MouseEvent e) {}
 	};
 
 	ActionListener searchButtonActionListener = new ActionListener() {
@@ -457,10 +446,7 @@ public class MainFrame extends JFrame {
 	KeyListener searchTextFieldActionListener = new KeyListener() {
 
 		@Override
-		public void keyPressed(KeyEvent e) {
-			// TODO Auto-generated method stub
-
-		}
+		public void keyPressed(KeyEvent e) {}
 
 		@Override
 		public void keyReleased(KeyEvent e) {
@@ -470,17 +456,13 @@ public class MainFrame extends JFrame {
 		}
 
 		@Override
-		public void keyTyped(KeyEvent e) {
-			// TODO Auto-generated method stub
-
-		}
+		public void keyTyped(KeyEvent e) {}
 	};
 
 	DocumentListener searchTextFieldDocumentListener = new DocumentListener() {
 
 		@Override
-		public void changedUpdate(DocumentEvent e) {		
-		}
+		public void changedUpdate(DocumentEvent e) {}
 
 		@Override
 		public void insertUpdate(DocumentEvent e) {
@@ -491,9 +473,7 @@ public class MainFrame extends JFrame {
 		}
 
 		@Override
-		public void removeUpdate(DocumentEvent e) {
-
-		}
+		public void removeUpdate(DocumentEvent e) {}
 
 	};
 
@@ -559,13 +539,15 @@ public class MainFrame extends JFrame {
 
 	protected void singleTicketFound(TicketHolder ticketHolder) {
 		if (ticketHolder.getDateTime() == null) {
-			ticketHolder.setDateTime(DateTime.now());
+			ticketHolder.checkIn();
+			ticketsFile.singleCheckIn(ticketHolder.getTicketSort());
+			
 			final GreenNotification notification = new GreenNotification((JFrame) this, ticketHolder);
 			new Thread(){
 				@Override
 				public void run() {
 					try {
-						Thread.sleep(3000); // time after which pop up will disappear
+						Thread.sleep(Constants.TIMESHOWNOTIFICATION); // time after which pop up will disappear
 						notification.dispose();
 					} catch (InterruptedException e) {
 						e.printStackTrace();
@@ -583,26 +565,42 @@ public class MainFrame extends JFrame {
 
 		@Override
 		public void removeUpdate(DocumentEvent arg0) {
-			int total = 0;
-			for (TicketPanel tp : ticketPanels) {
-				total += tp.numberOfTickets() * tp.getTicketSort().getPrice();
-			}
-			totalCostLabel.setText(GeneralMethods.convertPriceIntToEuroString(total));
+			totalCostLabel.setText(GeneralMethods.convertPriceIntToEuroString(getTotalPriceOfOrderedTickets()));			
 		}
 
 		@Override
 		public void insertUpdate(DocumentEvent arg0) {
-			int total = 0;
-			for (TicketPanel tp : ticketPanels) {
-				total += tp.numberOfTickets() * tp.getTicketSort().getPrice();
-			}
-			totalCostLabel.setText(GeneralMethods.convertPriceIntToEuroString(total));
+			totalCostLabel.setText(GeneralMethods.convertPriceIntToEuroString(getTotalPriceOfOrderedTickets()));
 		}
 
 		@Override
 		public void changedUpdate(DocumentEvent arg0) {
-			// TODO Auto-generated method stub
-
+		}
+	};
+	
+	private int getTotalPriceOfOrderedTickets() {
+		int total = 0;
+		for (TicketPanel tp : ticketPanels) {
+			total += tp.numberOfTickets() * tp.getTicketSort().getPrice();
+		}
+		return total;
+	}
+	
+	ActionListener addTicketButtonListener = new ActionListener() {
+		
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			// Update all the ticketSorts
+			for (TicketPanel tp : ticketPanels) {
+				int n = tp.numberOfTickets();
+				for (TicketSort ts : ticketsFile.getTicketSorts()) {
+					if (tp.getTicketSort().getName().equals(ts.getName())) {
+						ts.addDoorSoldTickets(n);
+					}
+				}
+			}
+			
+			// Add TicketHolder(s) to ticketsFile
 		}
 	};
 	
@@ -620,7 +618,6 @@ public class MainFrame extends JFrame {
             	try {
 					Thread.sleep(10);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
             }
@@ -669,7 +666,7 @@ public class MainFrame extends JFrame {
 			@Override
 			public void run() {
 				try {
-					Thread.sleep(Constants.TIMETOWAIT); // time after which pop up will disappear
+					Thread.sleep(Constants.TIMETODOSAVEUPDATE); // time after which pop up will disappear
 					notification.dispose();
 				} catch (InterruptedException e) {
 					e.printStackTrace();

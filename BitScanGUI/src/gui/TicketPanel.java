@@ -28,7 +28,7 @@ public class TicketPanel extends JPanel {
 		setBackground(Constants.BACKGROUND_COLOR);
 		setLayout(null);
 
-		JLabel nameLabel = new JLabel(getTicketSort().getTicketName());
+		JLabel nameLabel = new JLabel(getTicketSort().getName());
 		nameLabel.setBounds(0, 11, 103, 22);
 		add(nameLabel);
 

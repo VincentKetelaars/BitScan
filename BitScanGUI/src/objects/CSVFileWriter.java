@@ -25,7 +25,7 @@ public class CSVFileWriter {
 
 	private void openStream() {
 		executor = Executors.newSingleThreadScheduledExecutor();
-		executor.scheduleAtFixedRate(new FileWriterRunner(), 0, Constants.TIMETOWAIT / 1000, TimeUnit.SECONDS);
+		executor.scheduleAtFixedRate(new FileWriterRunner(), 0, Constants.TIMETODOSAVEUPDATE / 1000, TimeUnit.SECONDS);
 	}
 
 	private void write() {
