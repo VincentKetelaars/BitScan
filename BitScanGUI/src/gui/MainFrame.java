@@ -277,7 +277,6 @@ public class MainFrame extends JFrame {
 
 		JPanel statisticsValuePanel = new JPanel();
 		statisticsValuePanel.setBackground(Constants.BACKGROUND_COLOR);
-		statisticsPanel.add(statisticsValuePanel, BorderLayout.EAST);
 		statisticsValuePanel.setLayout(new BoxLayout(statisticsValuePanel, BoxLayout.Y_AXIS));
 
 		capacityValueLabel = new JLabel();
@@ -295,6 +294,7 @@ public class MainFrame extends JFrame {
 		availableValueLabel.setBorder(Constants.STATISTICS_LABEL_BORDER);
 		statisticsValuePanel.add(availableValueLabel);
 
+		statisticsPanel.add(statisticsValuePanel, BorderLayout.EAST);
 		return statisticsPanel;
 	}
 
@@ -350,7 +350,7 @@ public class MainFrame extends JFrame {
 			public void run() {
 				ticketsFile = csv.read();
 				if (ticketsFile != null) {
-					updateListOfTicketsAndLabels(ticketsFile.getTicketHolders().toArray(new TicketHolder[0]));
+					updateListOfTicketsAndLabels();
 					startCSVFileWriter();
 				}
 			}
@@ -361,7 +361,18 @@ public class MainFrame extends JFrame {
 	private void startCSVFileWriter() {
 		csvFileWriter = new CSVFileWriter(ticketsFile);
 	}
+	
+	/**
+	 * Update the statisticsPanel and scrollPane, with all available ticketholders
+	 */
+	private void updateListOfTicketsAndLabels() {
+		updateListOfTicketsAndLabels(ticketsFile.getTicketHolders().toArray(new TicketHolder[0]));
+	}
 
+	/**
+	 * Update the statisticsPanel and scrollPane
+	 * @param data : array of ticketholders
+	 */
 	private void updateListOfTicketsAndLabels(TicketHolder[] data) {
 		eventTitleLabel.setText(ticketsFile.getEventName()); // Event label
 		eventDateLabel.setText(", " + ticketsFile.getStartDate().toString("dd MMMM yyyy"));
@@ -541,7 +552,7 @@ public class MainFrame extends JFrame {
 		if (ticketHolder.getDateTime() == null) {
 			ticketHolder.checkIn();
 			ticketsFile.singleCheckIn(ticketHolder.getTicketSort());
-			
+
 			final GreenNotification notification = new GreenNotification((JFrame) this, ticketHolder);
 			new Thread(){
 				@Override
@@ -577,7 +588,7 @@ public class MainFrame extends JFrame {
 		public void changedUpdate(DocumentEvent arg0) {
 		}
 	};
-	
+
 	private int getTotalPriceOfOrderedTickets() {
 		int total = 0;
 		for (TicketPanel tp : ticketPanels) {
@@ -585,9 +596,9 @@ public class MainFrame extends JFrame {
 		}
 		return total;
 	}
-	
+
 	ActionListener addTicketButtonListener = new ActionListener() {
-		
+
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
 			// Update all the ticketSorts
@@ -599,37 +610,47 @@ public class MainFrame extends JFrame {
 					}
 				}
 			}
-			
+
 			// Add TicketHolder(s) to ticketsFile
+
+
+			// Update views
+			updateListOfTicketsAndLabels(); // Update list of ticketHolders and statisticsPanel
+			for (TicketPanel tp : ticketPanels) { 
+				tp.updatePanel(); // Update ticketPanel
+			}			
 		}
 	};
-	
+
 	WindowAdapter windowAdapter = new WindowAdapter()
-    {
-        public void windowClosing(WindowEvent we)
-        {
-            if (csvFileWriter != null && !csvFileWriter.isDone()) {
-            	csvFileWriter.forceUpdate();
-            }
-            // If it takes long this notification will be shown.
-            NotDoneSavingNotification notification = startNotDoneSavingNotification();
-            
-            while (!csvFileWriter.isDone()) {
-            	try {
-					Thread.sleep(10);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
+	{
+		public void windowClosing(WindowEvent we)
+		{
+			if (csvFileWriter != null && !csvFileWriter.isDone()) {
+				csvFileWriter.forceUpdate();
+			}
+
+			if (csvFileWriter != null) {
+				// If it takes long this notification will be shown.
+				NotDoneSavingNotification notification = startNotDoneSavingNotification();
+
+				while (!csvFileWriter.isDone()) {
+					try {
+						Thread.sleep(10);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
 				}
-            }
-            
-            notification.dispose();
-        }
-    };
+
+				notification.dispose();
+			}
+		}
+	};
 
 	private class CSVFileDropTarget extends DropTargetAdapter {
 		Component component;
 		DropTarget dropTarget;
-		
+
 		public CSVFileDropTarget(Component c) {
 			component = c;
 			dropTarget = new DropTarget(c, DnDConstants.ACTION_COPY, this, true, null);
@@ -661,7 +682,7 @@ public class MainFrame extends JFrame {
 	}
 
 	protected NotDoneSavingNotification startNotDoneSavingNotification() {
-        final NotDoneSavingNotification notification = new NotDoneSavingNotification((JFrame) this);
+		final NotDoneSavingNotification notification = new NotDoneSavingNotification((JFrame) this);
 		new Thread(){
 			@Override
 			public void run() {
