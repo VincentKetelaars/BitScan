@@ -610,9 +610,22 @@ public class MainFrame extends JFrame {
     {
         public void windowClosing(WindowEvent we)
         {
-            if (csvFileWriter != null) {
-            	csvFileWriter.closeExecutor();
+            if (csvFileWriter != null && !csvFileWriter.isDone()) {
+            	csvFileWriter.forceUpdate();
             }
+            // If it takes long this notification will be shown.
+            NotDoneSavingNotification notification = startNotDoneSavingNotification();
+            
+            while (!csvFileWriter.isDone()) {
+            	try {
+					Thread.sleep(10);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+            }
+            
+            notification.dispose();
         }
     };
 
@@ -648,5 +661,21 @@ public class MainFrame extends JFrame {
 				ex.printStackTrace();
 			}
 		}
+	}
+
+	protected NotDoneSavingNotification startNotDoneSavingNotification() {
+        final NotDoneSavingNotification notification = new NotDoneSavingNotification((JFrame) this);
+		new Thread(){
+			@Override
+			public void run() {
+				try {
+					Thread.sleep(Constants.TIMETOWAIT); // time after which pop up will disappear
+					notification.dispose();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			};
+		}.start();
+		return notification;
 	}
 }

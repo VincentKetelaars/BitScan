@@ -11,8 +11,7 @@ import constants.Constants;
 
 public class CSVFileWriter {
 
-	private long TIMETOWAIT = 10; // In Seconds
-	private boolean available = false; // False by default
+	private boolean done = true; // False by default
 
 	private TicketsFile ticketFile;
 	private FileWriter fw;
@@ -26,8 +25,7 @@ public class CSVFileWriter {
 
 	private void openStream() {
 		executor = Executors.newSingleThreadScheduledExecutor();
-		executor.scheduleAtFixedRate(new FileWriterRunner(), 0, TIMETOWAIT, TimeUnit.SECONDS);
-		available = true;
+		executor.scheduleAtFixedRate(new FileWriterRunner(), 0, Constants.TIMETOWAIT / 1000, TimeUnit.SECONDS);
 	}
 
 	private void write() {
@@ -41,17 +39,20 @@ public class CSVFileWriter {
 	}
 
 	public void closeExecutor() {
-		executor.shutdownNow();
-		available = false;
+		executor.shutdown();
 	}
 
 	public void update(TicketsFile tf) {
 		this.ticketFile = tf;
+		done = false;
 	}
 
-	public void forceUpdate(TicketsFile tf) {
-		this.ticketFile = tf;
-		write();
+	public void forceUpdate() {
+		executor.execute(new FileWriterRunner());
+	}
+	
+	public boolean isDone() {
+		return done;
 	}
 
 	private class FileWriterRunner implements Runnable {
@@ -73,6 +74,8 @@ public class CSVFileWriter {
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+			} finally{
+				done = true;
 			}
 		}
 	}

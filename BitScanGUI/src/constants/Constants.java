@@ -36,6 +36,10 @@ public class Constants {
 	public static final int PREFERRED_APP_WIDTH = 500;
 	public static final int PREFERRED_APP_HEIGHT = 400;
 	
+	// Wait to save
+
+	public static final long TIMETOWAIT = 10000; // In miliseconds
+	
 	/* Strings */
 	
 	// CSV
