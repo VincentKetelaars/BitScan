@@ -380,7 +380,7 @@ public class MainFrame extends JFrame {
 		// Statistics
 		capacityValueLabel.setText(Integer.toString(ticketsFile.getCapacity()));
 		checkedInValueLabel.setText(Integer.toString(ticketsFile.getCheckedIn()));
-		availableValueLabel.setText(Integer.toString(ticketsFile.getCapacity() - ticketsFile.getTicketHolders().size()));
+		availableValueLabel.setText(Integer.toString(ticketsFile.getCapacity() - ticketsFile.getSold()));
 
 		// Sorted list
 		switch (sortBy) {

@@ -64,6 +64,14 @@ public class TicketsFile {
 		return checkedIn;
 	}
 
+	public int getSold() {
+		int sold = 0;
+		for (TicketSort ts : ticketSorts) {
+			sold += ts.getSold();
+		}
+		return sold;
+	}
+
 	public String getEventName() {
 		return eventName;
 	}
