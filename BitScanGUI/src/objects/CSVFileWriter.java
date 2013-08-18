@@ -42,6 +42,7 @@ public class CSVFileWriter {
 						e.printStackTrace();
 					}
 					write();
+					System.out.println("Yep, hiero!");
 				}
 			}
 		};

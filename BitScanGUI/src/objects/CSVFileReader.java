@@ -15,6 +15,7 @@ import javax.swing.JOptionPane;
 import org.joda.time.DateTime;
 
 import constants.Constants;
+import constants.GeneralMethods;
 
 public class CSVFileReader {
 
@@ -38,7 +39,7 @@ public class CSVFileReader {
 			return readFile();
 		} catch (IOException e) {
 			e.printStackTrace();
-			showErrorDialog();
+			GeneralMethods.showCompromisedFileErrorDialog(frame);
 		} 
 		return null;
 	}
@@ -51,7 +52,7 @@ public class CSVFileReader {
 		BufferedReader reader = Files.newBufferedReader(file.toPath(), ENCODING);
 		String line = reader.readLine();
 		if (line == null || !line.contains(Constants.identifierCSV)) {// Should be equals!!!
-			showErrorDialog();
+			GeneralMethods.showCompromisedFileErrorDialog(frame);
 			return null;
 		}
 		
@@ -84,6 +85,8 @@ public class CSVFileReader {
 			TicketHolder th = parseCSVLine(line);
 			if (th != null) {
 				ticketHolders.add(th);
+			} else {
+				break;
 			}
 		}
 		
@@ -109,7 +112,7 @@ public class CSVFileReader {
 
 		if (items.length != 7) {
 			// Something is wrong!
-			showErrorDialog();
+			GeneralMethods.showCompromisedFileErrorDialog(frame);
 			return null;
 		} else {
 			int table = Integer.parseInt(items[0]);
@@ -158,10 +161,6 @@ public class CSVFileReader {
 			return false;
 		default: return false;
 		}		
-	}
-
-	private void showErrorDialog() {
-		JOptionPane.showMessageDialog(frame, Constants.LOAD_FILE_ERROR_MESSAGE, Constants.LOAD_FILE_ERROR_TITLE, JOptionPane.WARNING_MESSAGE);
 	}
 
 }

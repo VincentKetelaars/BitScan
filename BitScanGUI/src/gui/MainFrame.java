@@ -11,6 +11,7 @@ import java.awt.GridLayout;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetAdapter;
 import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -155,7 +156,7 @@ public class MainFrame extends JFrame {
 		leftPanel.add(createSearchByPanel());
 
 		scrollPane = new JScrollPane();
-		scrollPane.setDropTarget(csvFileDropTarget);
+		new CSVFileDropTarget(scrollPane);
 		scrollPane.setBorder(new EmptyBorder(5,5,5,5));
 		scrollPane.setBackground(Constants.BACKGROUND_COLOR);
 		scrollPane.setPreferredSize(new Dimension(800, 1000));
@@ -233,7 +234,7 @@ public class MainFrame extends JFrame {
 				openFileChooser();
 			}
 		});
-		loadPanel.setDropTarget(csvFileDropTarget);
+		new CSVFileDropTarget(loadButton);
 		loadPanel.add(loadButton);
 
 		rightPanel.add(createStatisticsPanel());	
@@ -327,7 +328,7 @@ public class MainFrame extends JFrame {
 
 	private void openFileChooser() {
 		JFileChooser fc = new JFileChooser();
-		FileFilter filter = new FileNameExtensionFilter("CSV file", "csv");
+		FileFilter filter = new FileNameExtensionFilter("CSV file", Constants.EXTENSION);
 		fc.setFileFilter(filter);
 		int returnVal = fc.showDialog(this, "Import");		
 
@@ -346,7 +347,7 @@ public class MainFrame extends JFrame {
 				ticketsFile = csv.read();
 				if (ticketsFile != null) {
 					updateListOfTicketsAndLabels(ticketsFile.getTicketHolders().toArray(new TicketHolder[0]));
-					startCSVFileWriter();
+					//					startCSVFileWriter();
 				}
 			}
 		};
@@ -602,7 +603,15 @@ public class MainFrame extends JFrame {
 		}
 	};
 
-	DropTarget csvFileDropTarget = new DropTarget() {
+	private class CSVFileDropTarget extends DropTargetAdapter {
+		Component component;
+		DropTarget dropTarget;
+		
+		public CSVFileDropTarget(Component c) {
+			component = c;
+			dropTarget = new DropTarget(c, DnDConstants.ACTION_COPY, this, true, null);
+		}
+
 		public synchronized void drop(DropTargetDropEvent evt) {
 			try {
 				evt.acceptDrop(DnDConstants.ACTION_COPY);
@@ -610,13 +619,22 @@ public class MainFrame extends JFrame {
 
 				if (droppedFiles.size() > 1) {
 					showTooManyFilesErrorDialog();
+					return;
 				}
 
-				runCSVReader(droppedFiles.get(0));
+				File file = droppedFiles.get(0);
+				String filename = file.getName();
+				String extension = filename.substring(filename.lastIndexOf(".") + 1, filename.length());
+				if (!file.isFile() || !extension.equalsIgnoreCase(Constants.EXTENSION)) {
+					GeneralMethods.showWrongFileErrorDialog(component);	
+					return;
+				}
+
+				runCSVReader(file);
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
 		}
-	};
+	}
 
 }

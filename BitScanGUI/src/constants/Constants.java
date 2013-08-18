@@ -40,6 +40,7 @@ public class Constants {
 	
 	// CSV
 	public static final String identifierCSV = "identifier";
+	public static final String EXTENSION = "csv";
 	
 	// Files
 	public static final String GREEN_BAR = "images/green-bar.gif";	
@@ -47,7 +48,8 @@ public class Constants {
 	public static final String RED_BAR = "images/red-bar.png";	
 	
 	// Messages
-	public static final String LOAD_FILE_ERROR_MESSAGE = "This file can not be imported!";
+	public static final String LOAD_FILE_ERROR_MESSAGE = "The file contents is compromised!";
+	public static final String NOT_CSV_FILE_ERROR_MESSAGE = "You can only import CSV files!";
 	public static final String LOAD_FILE_ERROR_TITLE = "Import error";	
 	public static final String LOAD_MULTIPLE_FILES_ERROR_MESSAGE = "You can only import one file!";
 

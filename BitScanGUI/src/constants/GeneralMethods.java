@@ -1,5 +1,9 @@
 package constants;
 
+import java.awt.Component;
+
+import javax.swing.JOptionPane;
+
 import org.joda.time.DateTime;
 
 public class GeneralMethods {
@@ -17,6 +21,14 @@ public class GeneralMethods {
 			return "0000-00-00 00:00:00";
 		}
 		return dt.toString("yyyy-MM-dd hh:mm:ss");
+	}
+	
+	public static void showCompromisedFileErrorDialog(Component component) {
+		JOptionPane.showMessageDialog(component, Constants.LOAD_FILE_ERROR_MESSAGE, Constants.LOAD_FILE_ERROR_TITLE, JOptionPane.WARNING_MESSAGE);
+	}
+
+	public static void showWrongFileErrorDialog(Component component) {
+		JOptionPane.showMessageDialog(component, Constants.NOT_CSV_FILE_ERROR_MESSAGE, Constants.LOAD_FILE_ERROR_TITLE, JOptionPane.WARNING_MESSAGE);
 	}
 
 }
