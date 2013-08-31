@@ -5,19 +5,19 @@ import constants.GeneralMethods;
 
 public class TicketSort {
 	
-	private String ticketName;
+	private String name;
 	private int price; // In cents and positive
 	private int capacity;
 	private int sold;
 	private int checkedIn;
 	private boolean doorSale;
 	
-	public TicketSort(String ticketName) {
-		setTicketName(ticketName);
+	public TicketSort(String name) {
+		setName(name);
 	}
 	
 	public TicketSort(String ticketName, int price, int capacity, int sold, int checkedIn, boolean doorSale) {
-		setTicketName(ticketName);
+		setName(ticketName);
 		setPrice(price);
 		setCapacity(capacity);
 		setSold(sold);
@@ -25,12 +25,12 @@ public class TicketSort {
 		setDoorSale(doorSale);
 	}
 
-	public String getTicketName() {
-		return ticketName;
+	public String getName() {
+		return name;
 	}
 
-	public void setTicketName(String ticketName) {
-		this.ticketName = ticketName;
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public int getCapacity() {
@@ -74,7 +74,16 @@ public class TicketSort {
 	}
 	
 	public String getPriceRepresentation() {
-		return GeneralMethods.convertPriceIntToString(price);
+		return GeneralMethods.convertPriceIntToEuroString(price);
+	}
+	
+	public void addDoorSoldTickets(int n) {
+		checkedIn += n;
+		sold += n;
+	}
+	
+	public void singleCheckIn() {
+		checkedIn++;
 	}
 
 }

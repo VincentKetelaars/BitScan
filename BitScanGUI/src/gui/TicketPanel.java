@@ -1,4 +1,4 @@
-package objects;
+package gui;
 
 import java.awt.Component;
 import java.awt.Rectangle;
@@ -9,12 +9,16 @@ import javax.swing.JTextField;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.AbstractDocument;
 
+import objects.DigitsDocumentFilter;
+import objects.TicketSort;
 import constants.Constants;
 
 public class TicketPanel extends JPanel {
 
 	private TicketSort ticketSort;
 	private JTextField amountTextField;
+	private JLabel availabilityLabel;
+	private JLabel priceLabel;
 
 	public TicketPanel(TicketSort ticketSort) {
 		this.setTicketSort(ticketSort);
@@ -26,15 +30,17 @@ public class TicketPanel extends JPanel {
 		setBackground(Constants.BACKGROUND_COLOR);
 		setLayout(null);
 
-		JLabel nameLabel = new JLabel(getTicketSort().getTicketName());
+		JLabel nameLabel = new JLabel(getTicketSort().getName());
 		nameLabel.setBounds(0, 11, 103, 22);
 		add(nameLabel);
 
-		JLabel priceLabel = new JLabel(getTicketSort().getPriceRepresentation());
+		priceLabel = new JLabel();
+		setPriceLabel();
 		priceLabel.setBounds(new Rectangle(182, 11, 71, 22));
 		add(priceLabel);
 
-		JLabel availabilityLabel = new JLabel(getTicketSort().getCapacity() - getTicketSort().getSold()+" / "+getTicketSort().getCapacity());
+		availabilityLabel = new JLabel();
+		setAvailabilityLabel();
 		availabilityLabel.setBounds(new Rectangle(309, 11, 55, 22));
 		add(availabilityLabel);
 
@@ -64,6 +70,21 @@ public class TicketPanel extends JPanel {
 
 	public void setTicketSort(TicketSort ticketSort) {
 		this.ticketSort = ticketSort;
+	}
+
+	public void updatePanel() {
+		setPriceLabel();
+		setAvailabilityLabel();
+		amountTextField.setText("");
+		this.invalidate();
+	}
+	
+	private void setPriceLabel() {
+		priceLabel.setText(getTicketSort().getPriceRepresentation());
+	}
+	
+	private void setAvailabilityLabel() {
+		availabilityLabel.setText(getTicketSort().getCapacity() - getTicketSort().getSold()+" / "+getTicketSort().getCapacity());
 	}
 
 }
