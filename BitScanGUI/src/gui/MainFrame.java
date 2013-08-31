@@ -62,7 +62,7 @@ public class MainFrame extends JFrame {
 	private JLabel checkedInValueLabel;
 	private JLabel availableValueLabel;
 
-	private String sortBy = "Barcode";
+	private String sortBy = "Barcode"; // Default value is "Barcode"
 	
 	private ArrayList<TicketPanel> ticketPanels;
 	private JLabel totalCostLabel;
