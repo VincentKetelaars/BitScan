@@ -13,7 +13,7 @@ public class GeneralMethods {
 	}
 	
 	public static String convertPriceIntToEuroString(int price) {
-		return "€" + convertPriceIntToString(price);
+		return Constants.euro + convertPriceIntToString(price);
 	}	
 
 	public static String dateTimeToString(DateTime dt) {

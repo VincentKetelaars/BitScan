@@ -71,9 +71,9 @@ public class TicketHolderRenderer implements ListCellRenderer<TicketHolder> {
 		Image img = null;
 		try {
 			if (value.getDateTime() == null) {
-				img = ImageIO.read(new File(Constants.GRAY_BAR));
+				img = ImageIO.read(getClass().getResource(Constants.GRAY_BAR));
 			} else {
-				img = ImageIO.read(new File(Constants.GREEN_BAR));
+				img = ImageIO.read(getClass().getResource(Constants.GREEN_BAR));
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

@@ -42,14 +42,18 @@ public class Constants {
 	
 	/* Strings */
 	
+	// Unicode
+	public static final String euro = "\u20ac";
+	
 	// CSV
 	public static final String identifierCSV = "identifier";
 	public static final String EXTENSION = "csv";
 	
-	// Files
-	public static final String GREEN_BAR = "images/green-bar.gif";	
-	public static final String GRAY_BAR = "images/gray-bar.png";	
-	public static final String RED_BAR = "images/red-bar.png";	
+	// Images
+	// Note that these will only work with the ant build, if the images folder is in the root
+	public static final String GREEN_BAR = "/images/green-bar.gif";
+	public static final String GRAY_BAR = "/images/gray-bar.png";
+	public static final String RED_BAR = "/images/red-bar.png";
 	
 	// Messages
 	public static final String LOAD_FILE_ERROR_MESSAGE = "The file contents is compromised!";
