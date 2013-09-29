@@ -17,7 +17,7 @@ import org.joda.time.DateTime;
 import constants.Constants;
 import constants.GeneralMethods;
 
-public class CSVFileReader {
+public class CSVFileReader implements IFileReader {
 
 	private File file;
 

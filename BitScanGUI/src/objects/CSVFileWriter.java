@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 
 import constants.Constants;
 
-public class CSVFileWriter {
+public class CSVFileWriter implements IFileWriter {
 
 	private boolean done = true; // False by default
 
@@ -19,7 +19,10 @@ public class CSVFileWriter {
 	private ScheduledExecutorService executor;
 
 	public CSVFileWriter(TicketsFile tf) {
-		this.ticketFile = tf;
+		this.ticketFile = tf;		
+	}
+	
+	public void open() {
 		openStream();
 	}
 
@@ -37,8 +40,12 @@ public class CSVFileWriter {
 			e.printStackTrace();
 		}
 	}
+	
+	public void close() {
+		closeExecutor();
+	}
 
-	public void closeExecutor() {
+	private void closeExecutor() {
 		executor.shutdown();
 	}
 

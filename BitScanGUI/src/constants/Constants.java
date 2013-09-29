@@ -3,6 +3,7 @@ package constants;
 import java.awt.Color;
 import java.awt.Font;
 
+import javax.swing.Icon;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 
@@ -40,14 +41,31 @@ public class Constants {
 	public static final long TIMETODOSAVEUPDATE = 10000; // In miliseconds
 	public static final long TIMESHOWNOTIFICATION = 3000; // In miliseconds
 	
+	// Dialogs
+	public static final String FILE_CHOOSER_TITLE = "Import";
+	
 	/* Strings */
+	
+	// Main
+	public static final String TITLE = "BitScan";
+	public static final String ENTRANCE_TAB_TIP = "Entrance";
+	public static final String ENTRANCE_TAB_LABEL = "Entrance";
+	
+	// Buttons and Labels
+	public static final String EVENT_TITLE_LABEL = "Event";
+	public static final String SEARCH_BUTTON = "Search";
+	public static final String LOAD_BUTTON = "Load";
 	
 	// Unicode
 	public static final String euro = "\u20ac";
 	
 	// CSV
 	public static final String identifierCSV = "identifier";
-	public static final String EXTENSION = "csv";
+	public static final String CSV_DESCRIPTION = "CSV file";
+	public static final String CSV_EXTENSION = "csv";
+	
+	// FileWriter extensions, case ignored
+	public static final String[] VALID_EXTENSIONS = {CSV_EXTENSION};
 	
 	// Images
 	// Note that these will only work with the ant build, if the images folder is in the root
@@ -62,4 +80,10 @@ public class Constants {
 	public static final String LOAD_MULTIPLE_FILES_ERROR_MESSAGE = "You can only import one file!";
 
 
+
+
+
+	
+	// Sorting
+	public static enum SortArrayBy {BARCODE, NAME, EMAIL}
 }
