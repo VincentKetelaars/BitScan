@@ -5,6 +5,8 @@ import java.util.Arrays;
 
 import javax.swing.JOptionPane;
 
+import objects.TicketsFile;
+
 import org.joda.time.DateTime;
 
 import constants.Constants.SortArrayBy;
@@ -70,5 +72,9 @@ public class GeneralMethods {
 		default : 
 			return "Barcode";
 		}
+	}
+
+	public static String getEventDateString(TicketsFile ticketsFile) {
+		return ", " + ticketsFile.getStartDate().toString("dd MMMM yyyy");
 	}
 }

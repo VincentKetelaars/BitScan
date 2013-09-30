@@ -1,4 +1,6 @@
-package objects;
+package io;
+
+import objects.TicketsFile;
 
 public interface IFileWriter {
 	

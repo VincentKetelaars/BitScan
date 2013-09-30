@@ -5,6 +5,10 @@ import gui.IMainFrame;
 import gui.MainFrame;
 import gui.NotDoneSavingNotification;
 import gui.TicketPanel;
+import io.CSVFileReader;
+import io.CSVFileWriter;
+import io.IFileReader;
+import io.IFileWriter;
 
 import java.awt.Component;
 import java.awt.datatransfer.DataFlavor;
@@ -49,7 +53,7 @@ public class MainLogic {
 	}
 	
 	public JFrame mainFrame() {
-		return mainFrame.returnFrame();
+		return mainFrame.getFrame();
 	}
 	
 	public void openFileChooser() {
@@ -184,22 +188,6 @@ public class MainLogic {
 			return o1.getEmail().compareTo(o2.getEmail());
 		}
 
-	};
-	
-	public KeyListener searchTextFieldActionListener = new KeyListener() {
-
-		@Override
-		public void keyPressed(KeyEvent e) {}
-
-		@Override
-		public void keyReleased(KeyEvent e) {
-			if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-				mainFrame.clickSearchButton();
-			}
-		}
-
-		@Override
-		public void keyTyped(KeyEvent e) {}
 	};	
 	
 	public void windowClosing() {
@@ -240,7 +228,7 @@ public class MainLogic {
 	}
 
 	protected NotDoneSavingNotification startNotDoneSavingNotification() {
-		final NotDoneSavingNotification notification = new NotDoneSavingNotification(mainFrame.returnFrame());
+		final NotDoneSavingNotification notification = new NotDoneSavingNotification(mainFrame.getFrame());
 		new Thread(){
 			@Override
 			public void run() {

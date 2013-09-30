@@ -1,5 +1,8 @@
 package gui;
 
+import io.CSVFileReader;
+import io.CSVFileWriter;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -46,8 +49,6 @@ import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import objects.CSVFileReader;
-import objects.CSVFileWriter;
 import objects.FileDropTarget;
 import objects.MainLogic;
 import objects.TicketHolder;
@@ -99,16 +100,8 @@ public class MainFrame extends JFrame implements IMainFrame {
 		this.addWindowListener(windowAdapter);
 	}
 	
-	public JFrame returnFrame() {
+	public JFrame getFrame() {
 		return (JFrame) this;
-	}
-	
-	public String searchTextFieldContents() {
-		return searchTextField.getText();
-	}
-	
-	public void clickSearchButton() {
-		searchButton.doClick();
 	}
 
 	/**
@@ -198,7 +191,7 @@ public class MainFrame extends JFrame implements IMainFrame {
 		searchTextField = new JTextField();
 		searchTextField.setColumns(20);
 		searchTextField.getDocument().addDocumentListener(searchTextFieldDocumentListener);
-		searchTextField.addKeyListener(mainLogic.searchTextFieldActionListener);
+		searchTextField.addKeyListener(searchTextFieldActionListener);
 		searchPanel.add(searchTextField);	
 
 		searchButton = new JButton(Constants.SEARCH_BUTTON);
@@ -267,7 +260,7 @@ public class MainFrame extends JFrame implements IMainFrame {
 		statisticsPanel.setBackground(Constants.BACKGROUND_COLOR);
 		statisticsPanel.setLayout(new BorderLayout(0, 0));
 
-		JLabel statisticsTitleLabel = new JLabel("Statistics");
+		JLabel statisticsTitleLabel = new JLabel(Constants.STATISTICS_LABEL_TITLE);
 		statisticsTitleLabel.setBorder(new EmptyBorder(0, 0, 20, 0));
 		statisticsTitleLabel.setFont(Constants.HEADER_FONT);
 		statisticsPanel.add(statisticsTitleLabel, BorderLayout.NORTH);
@@ -277,15 +270,15 @@ public class MainFrame extends JFrame implements IMainFrame {
 		statisticsPanel.add(statisticsTablePanel, BorderLayout.WEST);
 		statisticsTablePanel.setLayout(new BoxLayout(statisticsTablePanel, BoxLayout.Y_AXIS));
 
-		JLabel capacityTitleLabel = new JLabel("Capacity");
+		JLabel capacityTitleLabel = new JLabel(Constants.CAPACITY_LABEL_TITLE);
 		capacityTitleLabel.setBorder(Constants.STATISTICS_LABEL_BORDER);
 		statisticsTablePanel.add(capacityTitleLabel);
 
-		JLabel checkedInTitleLabel = new JLabel("Checked-In");
+		JLabel checkedInTitleLabel = new JLabel(Constants.CHECKED_IN_LABEL_TITLE);
 		checkedInTitleLabel.setBorder(Constants.STATISTICS_LABEL_BORDER);
 		statisticsTablePanel.add(checkedInTitleLabel);
 
-		JLabel availableTitleLabel = new JLabel("Available Tickets");
+		JLabel availableTitleLabel = new JLabel(Constants.AVAILABLE_LABEL_TITLE);
 		availableTitleLabel.setBorder(Constants.STATISTICS_LABEL_BORDER);
 		statisticsTablePanel.add(availableTitleLabel);
 
@@ -318,7 +311,7 @@ public class MainFrame extends JFrame implements IMainFrame {
 		buyTicketPanel.setLayout(new BorderLayout(0, 0));
 		buyTicketPanel.setBorder(new EmptyBorder(0, Constants.RIGHT_PANEL_SIDE_MARGIN, 0, Constants.RIGHT_PANEL_SIDE_MARGIN));
 
-		JLabel purchaseTicketLabel = new JLabel("Purchase Ticket");
+		JLabel purchaseTicketLabel = new JLabel(Constants.PURCHASE_TICKET_LABEL_TITLE);
 		buyTicketPanel.add(purchaseTicketLabel, BorderLayout.NORTH);
 		purchaseTicketLabel.setFont(Constants.HEADER_FONT);
 
@@ -333,7 +326,7 @@ public class MainFrame extends JFrame implements IMainFrame {
 		buyTicketPanel.add(purchaseTicketsPanel, BorderLayout.SOUTH);
 		purchaseTicketsPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
 
-		JButton purchaseTicketsButton = new JButton("Purchase Tickets");
+		JButton purchaseTicketsButton = new JButton(Constants.PURCHASE_TICKET_BUTTON_TITLE);
 		purchaseTicketsButton.addActionListener(addTicketButtonListener);
 		purchaseTicketsPanel.add(purchaseTicketsButton);
 
@@ -357,7 +350,7 @@ public class MainFrame extends JFrame implements IMainFrame {
 	 */
 	public void updateListOfTicketsAndLabels(TicketHolder[] data, TicketsFile ticketsFile) {
 		eventTitleLabel.setText(ticketsFile.getEventName()); // Event label
-		eventDateLabel.setText(", " + ticketsFile.getStartDate().toString("dd MMMM yyyy"));
+		eventDateLabel.setText(GeneralMethods.getEventDateString(ticketsFile));
 
 		// Statistics
 		capacityValueLabel.setText(Integer.toString(ticketsFile.getCapacity()));
@@ -428,7 +421,7 @@ public class MainFrame extends JFrame implements IMainFrame {
 	ActionListener searchButtonActionListener = new ActionListener() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			ArrayList<TicketHolder> ths = mainLogic.search(searchTextFieldContents(), sortBy);
+			ArrayList<TicketHolder> ths = mainLogic.search(searchTextField.getText(), sortBy);
 			if (ths == null) {
 				return;
 			} else if (ths.size() == 1) {
@@ -478,7 +471,7 @@ public class MainFrame extends JFrame implements IMainFrame {
 
 		@Override
 		public void insertUpdate(DocumentEvent e) {
-			ArrayList<TicketHolder> ths = mainLogic.search(searchTextFieldContents(), sortBy);
+			ArrayList<TicketHolder> ths = mainLogic.search(searchTextField.getText(), sortBy);
 			if (ths == null)
 				return;
 			updateListOfTicketsAndLabels(ths.toArray(new TicketHolder[0]), mainLogic.getTicketsFile());	
@@ -487,5 +480,21 @@ public class MainFrame extends JFrame implements IMainFrame {
 		@Override
 		public void removeUpdate(DocumentEvent e) {}
 
+	};	
+	
+	public KeyListener searchTextFieldActionListener = new KeyListener() {
+
+		@Override
+		public void keyPressed(KeyEvent e) {}
+
+		@Override
+		public void keyReleased(KeyEvent e) {
+			if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+				searchButton.doClick();
+			}
+		}
+
+		@Override
+		public void keyTyped(KeyEvent e) {}
 	};	
 }

@@ -1,4 +1,4 @@
-package objects;
+package io;
 
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -7,6 +7,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import objects.TicketsFile;
 import constants.Constants;
 
 public class CSVFileWriter implements IFileWriter {

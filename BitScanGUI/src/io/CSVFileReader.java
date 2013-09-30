@@ -1,4 +1,4 @@
-package objects;
+package io;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -11,6 +11,10 @@ import java.util.HashMap;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+
+import objects.TicketHolder;
+import objects.TicketSort;
+import objects.TicketsFile;
 
 import org.joda.time.DateTime;
 
