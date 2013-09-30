@@ -1,7 +1,8 @@
 package objects;
 
-import constants.GeneralMethods;
+import java.util.logging.Logger;
 
+import constants.GeneralMethods;
 
 public class TicketSort {
 	
@@ -11,6 +12,8 @@ public class TicketSort {
 	private int sold;
 	private int checkedIn;
 	private boolean doorSale;
+	
+	private final static Logger LOGGER = Logger.getLogger(TicketSort.class.getName()); 
 	
 	public TicketSort(String name) {
 		setName(name);
@@ -78,6 +81,10 @@ public class TicketSort {
 	}
 	
 	public void addDoorSoldTickets(int n) {
+		if (isDoorSale()) {
+			LOGGER.warning(String.format("A ticket is sold add the door, while this is not authorized for: %s", getName()));
+			return;
+		}
 		checkedIn += n;
 		sold += n;
 	}

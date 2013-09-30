@@ -4,58 +4,38 @@ import gui.GreenNotification;
 import gui.IMainFrame;
 import gui.MainFrame;
 import gui.NotDoneSavingNotification;
-import gui.TicketPanel;
 import io.CSVFileReader;
 import io.CSVFileWriter;
 import io.IFileReader;
 import io.IFileWriter;
 
-import java.awt.Component;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.dnd.DnDConstants;
-import java.awt.dnd.DropTarget;
-import java.awt.dnd.DropTargetAdapter;
-import java.awt.dnd.DropTargetDropEvent;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.List;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import constants.Constants;
 import constants.Constants.SortArrayBy;
-import constants.GeneralMethods;
 
 public class MainLogic {
-	
+
 	private TicketsFile ticketsFile;
-	private IFileWriter csvFileWriter;
+	private IFileWriter fileWriter;
 	private IMainFrame mainFrame;
-	
+
 	public MainLogic(MainFrame mf) {
 		this.mainFrame = mf;
 	}
-	
+
 	public JFrame mainFrame() {
 		return mainFrame.getFrame();
 	}
-	
+
 	public void openFileChooser() {
 		JFileChooser fc = new JFileChooser();
 		FileFilter filter = new FileNameExtensionFilter(Constants.CSV_DESCRIPTION, Constants.CSV_EXTENSION);
@@ -67,7 +47,7 @@ public class MainLogic {
 			runFileReader(f);
 		} 
 	}
-	
+
 	public void runFileReader(File f) {
 		final IFileReader fr = new CSVFileReader(f, mainFrame());
 		Runnable r = new Runnable() {
@@ -83,12 +63,12 @@ public class MainLogic {
 		};
 		r.run();
 	}
-	
+
 	public void startFileWriter() {
-		csvFileWriter = new CSVFileWriter(ticketsFile);
-		csvFileWriter.open();
+		fileWriter = new CSVFileWriter(ticketsFile);
+		fileWriter.open();
 	}
-	
+
 	public TicketHolder[] sortArraybySortBy(TicketHolder[] data, SortArrayBy sortBy) {
 		// Sorted list
 		switch (sortBy) {
@@ -105,7 +85,7 @@ public class MainLogic {
 		}
 		return data;
 	}
-	
+
 	public ArrayList<TicketHolder> search(String s, SortArrayBy sortBy) {
 		if (ticketsFile == null || ticketsFile.getTicketHolders() == null)
 			return null;
@@ -137,8 +117,8 @@ public class MainLogic {
 		}
 		return l;
 	}
-	
-	public void singleTicketFound(TicketHolder ticketHolder) {
+
+	public void singleTicketClicked(TicketHolder ticketHolder) {
 		if (ticketHolder.getDateTime() == null) {
 			ticketHolder.checkIn();
 			ticketsFile.singleCheckIn(ticketHolder.getTicketSort());
@@ -158,11 +138,10 @@ public class MainLogic {
 		} else {
 			// This ticket has already been checked!
 		}
-		mainFrame.updateListOfTicketsAndLabels(new TicketHolder[]{ticketHolder}, ticketsFile);
-		csvFileWriter.update(ticketsFile);
+		fileWriter.update(ticketsFile);
 	}
 
-	
+
 	Comparator<TicketHolder> IDComparator = new Comparator<TicketHolder>() {
 
 		@Override
@@ -189,17 +168,17 @@ public class MainLogic {
 		}
 
 	};	
-	
+
 	public void windowClosing() {
-		if (csvFileWriter != null && !csvFileWriter.isDone()) {
-			csvFileWriter.forceUpdate();
+		if (fileWriter != null && !fileWriter.isDone()) {
+			fileWriter.forceUpdate();
 		}
 
-		if (csvFileWriter != null) {
+		if (fileWriter != null) {
 			// If it takes long this notification will be shown.
 			NotDoneSavingNotification notification = startNotDoneSavingNotification();
 
-			while (!csvFileWriter.isDone()) {
+			while (!fileWriter.isDone()) {
 				try {
 					Thread.sleep(10);
 				} catch (InterruptedException e) {
@@ -212,17 +191,10 @@ public class MainLogic {
 	}
 
 	public void addDoorSoldTicket(int n, TicketSort ticketSort) {
-		for (TicketSort ts : ticketsFile.getTicketSorts()) {
-			if (ticketSort.getName().equals(ts.getName())) {
-				ts.addDoorSoldTickets(n);
-			}
-		}
-
-
-		// Add TicketHolder(s) to ticketsFile
-
+		ticketsFile.addDoorSoldTicket(n, ticketSort);
+		fileWriter.update(ticketsFile);
 	}
-	
+
 	public TicketsFile getTicketsFile() {
 		return ticketsFile;
 	}

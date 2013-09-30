@@ -1,7 +1,6 @@
 package constants;
 
 import java.awt.Component;
-import java.util.Arrays;
 
 import javax.swing.JOptionPane;
 
@@ -19,7 +18,11 @@ public class GeneralMethods {
 
 	public static String convertPriceIntToEuroString(int price) {
 		return Constants.euro + convertPriceIntToString(price);
-	}	
+	}
+	
+	public static DateTime getCurrentTime() {
+		return DateTime.now();
+	}
 
 	public static String dateTimeToString(DateTime dt) {
 		if (dt == null) {

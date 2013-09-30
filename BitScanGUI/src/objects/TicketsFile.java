@@ -19,7 +19,7 @@ public class TicketsFile {
 	private String eventDescription;
 	private DateTime startDate;
 	private DateTime endDate;
-	private ArrayList<TicketSort> ticketSorts;	
+	private ArrayList<TicketSort> ticketSorts;
 	
 	public TicketsFile(File file) {
 		this.file = file;
@@ -137,5 +137,14 @@ public class TicketsFile {
 				ts.singleCheckIn();
 			}
 		}
+	}
+	
+	public void addDoorSoldTicket(int n, TicketSort ticketSort) {
+		for (TicketSort ts : getTicketSorts()) {
+			if (ticketSort.getName().equals(ts.getName())) {
+				ts.addDoorSoldTickets(n);
+			}
+		}
+		ticketHolders.add(new TicketHolder(0,"","Doorsale",GeneralMethods.getCurrentTime(),"","",ticketSort));
 	}
 }

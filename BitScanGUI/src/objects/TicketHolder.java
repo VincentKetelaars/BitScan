@@ -2,6 +2,8 @@ package objects;
 
 import org.joda.time.DateTime;
 
+import constants.GeneralMethods;
+
 public class TicketHolder {
 
 	private int table;
@@ -121,7 +123,7 @@ public class TicketHolder {
 	 * Updates the DateTime
 	 */
 	public void checkIn() {
-		setDateTime(DateTime.now());
+		setDateTime(GeneralMethods.getCurrentTime());
 	}
 
 }

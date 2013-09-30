@@ -1,8 +1,5 @@
 package gui;
 
-import io.CSVFileReader;
-import io.CSVFileWriter;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -11,33 +8,23 @@ import java.awt.FlowLayout;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.GridLayout;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.dnd.DnDConstants;
-import java.awt.dnd.DropTarget;
-import java.awt.dnd.DropTargetAdapter;
-import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -46,17 +33,12 @@ import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.filechooser.FileFilter;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 import objects.FileDropTarget;
 import objects.MainLogic;
 import objects.TicketHolder;
 import objects.TicketSort;
 import objects.TicketsFile;
-
-import org.joda.time.DateTime;
-
 import constants.Constants;
 import constants.Constants.SortArrayBy;
 import constants.GeneralMethods;
@@ -99,7 +81,7 @@ public class MainFrame extends JFrame implements IMainFrame {
 		createMainLayout();
 		this.addWindowListener(windowAdapter);
 	}
-	
+
 	public JFrame getFrame() {
 		return (JFrame) this;
 	}
@@ -336,7 +318,7 @@ public class MainFrame extends JFrame implements IMainFrame {
 
 		return buyTicketPanel;
 	}
-	
+
 	/**
 	 * Update the statisticsPanel and scrollPane, with all available ticketholders
 	 */
@@ -357,24 +339,32 @@ public class MainFrame extends JFrame implements IMainFrame {
 		checkedInValueLabel.setText(Integer.toString(ticketsFile.getCheckedIn()));
 		availableValueLabel.setText(Integer.toString(ticketsFile.getCapacity() - ticketsFile.getSold()));
 
-		data = mainLogic.sortArraybySortBy(data, sortBy);
+		final TicketHolder[] finalData = mainLogic.sortArraybySortBy(data, sortBy);
 
 		// Set list
-		JList list = new JList(data);
+		final JList list = new JList(data);
 		list.setCellRenderer(new TicketHolderRenderer());
+		list.addMouseListener(new MouseAdapter() {
+			public void mouseReleased(final MouseEvent e) {
+				int index = list.getSelectedIndex();
+				mainLogic.singleTicketClicked(finalData[index]);
+			}
+		});
 		scrollPane.setViewportView(list);
 
 		// Add the tickets
 		showTicketsPanel.removeAll(); // First remove any present components
 		ticketPanels = new ArrayList<TicketPanel>();
 		for (TicketSort ts : ticketsFile.getTicketSorts()) {
-			TicketPanel tp = new TicketPanel(ts);
-			tp.setDocumentListener(numberTicketsDocumentListener);
-			ticketPanels.add(tp);
-			showTicketsPanel.add(tp);
+			if (ts.isDoorSale()) { // Add only if doorsale is allowed!
+				TicketPanel tp = new TicketPanel(ts);
+				tp.setDocumentListener(numberTicketsDocumentListener);
+				ticketPanels.add(tp);
+				showTicketsPanel.add(tp);
+			}
 		}
 	}
-	
+
 	DocumentListener numberTicketsDocumentListener = new DocumentListener() {
 
 		@Override
@@ -399,7 +389,7 @@ public class MainFrame extends JFrame implements IMainFrame {
 		}
 		return total;
 	}
-	
+
 	ActionListener addTicketButtonListener = new ActionListener() {
 
 		@Override
@@ -417,7 +407,7 @@ public class MainFrame extends JFrame implements IMainFrame {
 			}			
 		}
 	};
-	
+
 	ActionListener searchButtonActionListener = new ActionListener() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
@@ -425,13 +415,13 @@ public class MainFrame extends JFrame implements IMainFrame {
 			if (ths == null) {
 				return;
 			} else if (ths.size() == 1) {
-				mainLogic.singleTicketFound(ths.get(0));
-			} else {
-				updateListOfTicketsAndLabels(ths.toArray(new TicketHolder[0]), mainLogic.getTicketsFile());
+				mainLogic.singleTicketClicked(ths.get(0));
 			}
+			// If one or more results, update the list with the result
+			updateListOfTicketsAndLabels(ths.toArray(new TicketHolder[0]), mainLogic.getTicketsFile());
 		}
 	};	
-	
+
 	MouseListener sortButtonActionListener = new MouseListener() {
 
 		@Override
@@ -455,7 +445,7 @@ public class MainFrame extends JFrame implements IMainFrame {
 		@Override
 		public void mouseClicked(MouseEvent e) {}
 	};
-	
+
 	WindowAdapter windowAdapter = new WindowAdapter()
 	{
 		public void windowClosing(WindowEvent we)
@@ -463,7 +453,7 @@ public class MainFrame extends JFrame implements IMainFrame {
 			mainLogic.windowClosing();
 		}
 	};
-	
+
 	public DocumentListener searchTextFieldDocumentListener = new DocumentListener() {
 
 		@Override
@@ -481,7 +471,7 @@ public class MainFrame extends JFrame implements IMainFrame {
 		public void removeUpdate(DocumentEvent e) {}
 
 	};	
-	
+
 	public KeyListener searchTextFieldActionListener = new KeyListener() {
 
 		@Override
