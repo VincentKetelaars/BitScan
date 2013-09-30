@@ -81,7 +81,7 @@ public class TicketSort {
 	}
 	
 	public void addDoorSoldTickets(int n) {
-		if (isDoorSale()) {
+		if (!isDoorSale()) {
 			LOGGER.warning(String.format("A ticket is sold add the door, while this is not authorized for: %s", getName()));
 			return;
 		}

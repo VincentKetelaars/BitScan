@@ -1,0 +1,1 @@
+Build an invariant, to check that the file at all times makes sense!

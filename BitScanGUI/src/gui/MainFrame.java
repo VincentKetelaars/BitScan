@@ -330,24 +330,27 @@ public class MainFrame extends JFrame implements IMainFrame {
 	 * Update the statisticsPanel and scrollPane
 	 * @param data : array of ticketholders that will be shown
 	 */
-	public void updateListOfTicketsAndLabels(TicketHolder[] data, TicketsFile ticketsFile) {
+	public void updateListOfTicketsAndLabels(TicketHolder[] data,final TicketsFile ticketsFile) {
 		eventTitleLabel.setText(ticketsFile.getEventName()); // Event label
 		eventDateLabel.setText(GeneralMethods.getEventDateString(ticketsFile));
 
 		// Statistics
 		capacityValueLabel.setText(Integer.toString(ticketsFile.getCapacity()));
 		checkedInValueLabel.setText(Integer.toString(ticketsFile.getCheckedIn()));
-		availableValueLabel.setText(Integer.toString(ticketsFile.getCapacity() - ticketsFile.getSold()));
-
-		final TicketHolder[] finalData = mainLogic.sortArraybySortBy(data, sortBy);
+		availableValueLabel.setText(Integer.toString(ticketsFile.getAvailable()));
+		
+		final TicketHolder[] finalData = mainLogic.sortArraybySortBy(data, sortBy, true);
 
 		// Set list
-		final JList list = new JList(data);
+		final JList list = new JList(finalData);
 		list.setCellRenderer(new TicketHolderRenderer());
 		list.addMouseListener(new MouseAdapter() {
 			public void mouseReleased(final MouseEvent e) {
 				int index = list.getSelectedIndex();
-				mainLogic.singleTicketClicked(finalData[index]);
+				if (index != -1 && index < finalData.length) {
+					mainLogic.singleTicketClicked(finalData[index]);
+					updateListOfTicketsAndLabels(new TicketHolder[]{finalData[index]}, ticketsFile);
+				}
 			}
 		});
 		scrollPane.setViewportView(list);

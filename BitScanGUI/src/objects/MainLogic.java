@@ -69,6 +69,17 @@ public class MainLogic {
 		fileWriter.open();
 	}
 
+	public TicketHolder[] sortArraybySortBy(TicketHolder[] data, SortArrayBy sortBy, boolean removeDoorSold) {
+		ArrayList<TicketHolder> filtered = new ArrayList<TicketHolder>(data.length);
+		for (TicketHolder th : data) {
+			// Only show tickets that have not been sold at the door!
+			if (!th.getComment().equals(Constants.DOOR_SOLD_TICKET_COMMENT)) {
+				filtered.add(th);
+			}
+		}
+		return sortArraybySortBy(filtered.toArray(new TicketHolder[0]), sortBy);
+	}
+
 	public TicketHolder[] sortArraybySortBy(TicketHolder[] data, SortArrayBy sortBy) {
 		// Sorted list
 		switch (sortBy) {

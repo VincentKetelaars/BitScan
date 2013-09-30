@@ -2,17 +2,20 @@ package objects;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map.Entry;
 
 import org.joda.time.DateTime;
 
 import constants.Constants;
 import constants.GeneralMethods;
 
+/**
+ * This TicketsFile most importantly holds everything there is to know about the event.
+ * Ticketholders can be door sold tickets. These should be ignored when displayed.
+ * @author Vincent Ketelaars
+ *
+ */
 public class TicketsFile {
-	
+
 	private File file;
 	private ArrayList<TicketHolder> ticketHolders;
 	private String eventName;
@@ -20,30 +23,30 @@ public class TicketsFile {
 	private DateTime startDate;
 	private DateTime endDate;
 	private ArrayList<TicketSort> ticketSorts;
-	
+
 	public TicketsFile(File file) {
 		this.file = file;
 	}
 
 	public ArrayList<TicketHolder> getTicketHolders() {
-		return ticketHolders;
+		return (ArrayList<TicketHolder>) ticketHolders.clone();
 	}
 
-	public void setTicketHolders(ArrayList<TicketHolder> ticketHolders2) {
-		this.ticketHolders = ticketHolders2;
+	public void setTicketHolders(ArrayList<TicketHolder> ticketHolders) {
+		this.ticketHolders = ticketHolders;
 	}
-	
+
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("TicketFile {\n");
 		sb.append("file : "+ getFile().toPath().toString() +"\n");
 		sb.append("ticket holders {\n");
-		
+
 		// Iterate over all TicketHolders
 		for (TicketHolder i : ticketHolders) {
 			sb.append("\t"+ i +"\n");
 		}
-		
+
 		sb.append("};\n");
 		return sb.toString();
 	}
@@ -70,6 +73,16 @@ public class TicketsFile {
 			sold += ts.getSold();
 		}
 		return sold;
+	}
+	
+	public int getAvailable() {
+		int available = 0;
+		for (TicketSort ts : ticketSorts) {
+			if (ts.isDoorSale()) {
+				available += ts.getCapacity() - ts.getSold();
+			}
+		}
+		return available;
 	}
 
 	public String getEventName() {
@@ -115,11 +128,11 @@ public class TicketsFile {
 	public File getFile() {
 		return file;
 	}
-	
+
 	public String toCSVOutput() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(eventName+","+eventDescription+","+GeneralMethods.dateTimeToString(startDate)+","+
-					GeneralMethods.dateTimeToString(endDate)+","+ticketSorts.size()+System.lineSeparator());
+				GeneralMethods.dateTimeToString(endDate)+","+ticketSorts.size()+System.lineSeparator());
 		for (TicketSort ts : ticketSorts) {
 			sb.append(ts.getName()+","+ts.getCapacity()+","+ts.getSold()+","+ts.getCheckedIn()+","+ts.isDoorSale()+","+
 					GeneralMethods.convertPriceIntToString(ts.getPrice())+System.lineSeparator());
@@ -130,7 +143,7 @@ public class TicketsFile {
 		}
 		return sb.toString();
 	}
-	
+
 	public void singleCheckIn(TicketSort ticketSort) {
 		for (TicketSort ts : ticketSorts) {
 			if (ts.getName().equals(ticketSort.getName())) {
@@ -138,13 +151,15 @@ public class TicketsFile {
 			}
 		}
 	}
-	
+
 	public void addDoorSoldTicket(int n, TicketSort ticketSort) {
 		for (TicketSort ts : getTicketSorts()) {
 			if (ticketSort.getName().equals(ts.getName())) {
 				ts.addDoorSoldTickets(n);
 			}
 		}
-		ticketHolders.add(new TicketHolder(0,"","Doorsale",GeneralMethods.getCurrentTime(),"","",ticketSort));
+		for (int i = 0; i < n; i ++) {
+			ticketHolders.add(new TicketHolder(0,"",Constants.DOOR_SOLD_TICKET_COMMENT,GeneralMethods.getCurrentTime(),"","",ticketSort));
+		}
 	}
 }

@@ -85,6 +85,9 @@ public class Constants {
 	public static final String LOAD_FILE_ERROR_TITLE = "Import error";	
 	public static final String LOAD_MULTIPLE_FILES_ERROR_MESSAGE = "You can only import one file!";
 
+	// Door sale
+	public static final String DOOR_SOLD_TICKET_COMMENT = "Doorsale";
+
 	// Sorting
 	public static enum SortArrayBy {BARCODE, NAME, EMAIL}
 }
