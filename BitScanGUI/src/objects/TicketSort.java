@@ -14,11 +14,7 @@ public class TicketSort {
 	private boolean doorSale;
 	
 	private final static Logger LOGGER = Logger.getLogger(TicketSort.class.getName()); 
-	
-	public TicketSort(String name) {
-		setName(name);
-	}
-	
+		
 	public TicketSort(String ticketName, int price, int capacity, int sold, int checkedIn, boolean doorSale) {
 		setName(ticketName);
 		setPrice(price);
@@ -91,6 +87,23 @@ public class TicketSort {
 	
 	public void singleCheckIn() {
 		checkedIn++;
+	}
+
+	public boolean invariant() {
+		boolean nameExists = name != null && name.length() > 0;
+		boolean priceExists = price > 0;
+		boolean capacityExists = capacity > 0;
+		boolean soldExists = sold >= 0;
+		boolean checkedInExists = checkedIn >= 0;
+		
+		boolean allExist = nameExists && priceExists && capacityExists && soldExists && checkedInExists;
+		if (!allExist)
+			return false;
+		
+		boolean enoughSpace = sold <= capacity;
+		boolean notTooManyCheckedIn = checkedIn <= sold;
+		
+		return enoughSpace && notTooManyCheckedIn;
 	}
 
 }

@@ -2,6 +2,7 @@ package objects;
 
 import org.joda.time.DateTime;
 
+import constants.Constants;
 import constants.GeneralMethods;
 
 public class TicketHolder {
@@ -12,30 +13,20 @@ public class TicketHolder {
 	private DateTime dateTime;
 	private String name;
 	private String email;
-	private TicketSort ticketSort;
+	private String ticketSortName;
 
 	public TicketHolder() {
 		// Don't initialize
 	}
 
-	public TicketHolder(int table, String id, String comment, DateTime dateTime, String name, String email, TicketSort ticketSort) {
+	public TicketHolder(int table, String id, String comment, DateTime dateTime, String name, String email, String ticketSortName) {
 		setTable(table);
 		setId(id);
 		setComment(comment);
 		setDateTime(dateTime);
 		setName(name);
 		setEmail(email);
-		setTicketSort(ticketSort);
-	}
-
-	public void setTicketHolder(int table, String id, String comment, DateTime dateTime, String name, String email, TicketSort ticketSort) {
-		setTable(table);
-		setId(id);
-		setComment(comment);
-		setDateTime(dateTime);
-		setName(name);
-		setEmail(email);
-		setTicketSort(ticketSort);
+		setTicketSortName(ticketSortName);
 	}
 
 	public int getTable() {
@@ -97,12 +88,12 @@ public class TicketHolder {
 		this.email = email;
 	}
 
-	public TicketSort getTicketSort() {
-		return ticketSort;
+	public String getTicketSortName() {
+		return ticketSortName;
 	}
 
-	public void setTicketSort(TicketSort ticketSort) {
-		this.ticketSort = ticketSort;
+	public void setTicketSortName(String items) {
+		this.ticketSortName = items;
 	}
 
 	public String toString() {
@@ -114,16 +105,38 @@ public class TicketHolder {
 		sb.append("\tdatetime : "+ dateTime +"\n");
 		sb.append("\tname : "+ name +"\n");
 		sb.append("\temail : "+ email +"\n");
-		sb.append("\tticketsort : "+ ticketSort +"\n");
+		sb.append("\tticketsort : "+ ticketSortName +"\n");
 		sb.append("};");
 		return sb.toString();
 	}
 	
 	/**
-	 * Updates the DateTime
+	 * Updates the DateTime to the current time
 	 */
 	public void checkIn() {
-		setDateTime(GeneralMethods.getCurrentTime());
+		if (dateTime != null)
+			setDateTime(GeneralMethods.getCurrentTime());
+		// TODO : Find a proper response if this ticket holder was already checked in.
+	}
+
+	public boolean invariant() {
+		boolean tableExists = table >= 0;
+		boolean idExists = id != null; // id is the empty string in case of doorsale
+		boolean commentExists = comment != null; // comment can be empty
+		boolean dateTimeExists = dateTime == null || dateTime.isBeforeNow(); // Either checked in already or not
+		boolean nameExists = name != null; // May be empty in case of doorsale
+		boolean emailExists = email != null; // May be empty in case of doorsale
+		boolean ticketSortExists = ticketSortName != null;
+		
+		boolean allExist = tableExists && idExists && commentExists && dateTimeExists && nameExists && emailExists && ticketSortExists;
+		if (!allExist)
+			return false;
+		
+		boolean doorSale = comment.equals(Constants.DOOR_SOLD_TICKET_COMMENT) && name.equals("") && email.equals("")
+				&& table == 0 && id.equals("");
+		boolean preSale = name.length() > 0 && email.length() > 0 && table >= 0 && id.length() > 0;
+		
+		return doorSale || preSale;
 	}
 
 }

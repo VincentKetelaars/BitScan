@@ -21,6 +21,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import constants.Constants;
 import constants.Constants.SortArrayBy;
+import constants.GeneralMethods;
 
 public class MainLogic {
 
@@ -55,6 +56,7 @@ public class MainLogic {
 			@Override
 			public void run() {
 				ticketsFile = fr.read();
+				invariant(); // Right after reading, everything should be in order!
 				if (ticketsFile != null) {
 					mainFrame.updateListOfTicketsAndLabels(ticketsFile);
 					startFileWriter();
@@ -132,7 +134,7 @@ public class MainLogic {
 	public void singleTicketClicked(TicketHolder ticketHolder) {
 		if (ticketHolder.getDateTime() == null) {
 			ticketHolder.checkIn();
-			ticketsFile.singleCheckIn(ticketHolder.getTicketSort());
+			ticketsFile.singleCheckIn(ticketHolder.getTicketSortName());
 
 			final GreenNotification notification = new GreenNotification(mainFrame(), ticketHolder);
 			new Thread(){
@@ -149,7 +151,7 @@ public class MainLogic {
 		} else {
 			// This ticket has already been checked!
 		}
-		fileWriter.update(ticketsFile);
+		updateFileWriter();
 	}
 
 
@@ -203,7 +205,7 @@ public class MainLogic {
 
 	public void addDoorSoldTicket(int n, TicketSort ticketSort) {
 		ticketsFile.addDoorSoldTicket(n, ticketSort);
-		fileWriter.update(ticketsFile);
+		updateFileWriter();
 	}
 
 	public TicketsFile getTicketsFile() {
@@ -224,5 +226,22 @@ public class MainLogic {
 			};
 		}.start();
 		return notification;
+	}
+	
+	private void updateFileWriter() {
+		invariant();
+		fileWriter.update(ticketsFile);
+	}
+	
+	/**
+	 * This method determines whether the current state of the MainLogic is correct,
+	 * insofar this can be checked statically.
+	 * @return True if the state is correct
+	 */
+	private void invariant() {
+		if (ticketsFile == null)
+			return;
+		if (!ticketsFile.invariant())
+			GeneralMethods.showInvariantErrorDialog(mainFrame());
 	}
 }

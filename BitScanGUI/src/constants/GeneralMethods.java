@@ -50,6 +50,10 @@ public class GeneralMethods {
 	public static void showTooManyFilesErrorDialog(Component component) {
 		JOptionPane.showMessageDialog(component, Constants.LOAD_MULTIPLE_FILES_ERROR_MESSAGE, Constants.LOAD_FILE_ERROR_TITLE, JOptionPane.WARNING_MESSAGE);
 	}
+	
+	public static void showInvariantErrorDialog(Component component) {
+		JOptionPane.showMessageDialog(component, Constants.INVARIANT_FAILS, Constants.INVARIANT_FAIL_TITLE, JOptionPane.WARNING_MESSAGE);
+	}
 
 	public static SortArrayBy convertStringToSortArrayBy(String text) {
 		switch(text) {

@@ -1,1 +1,3 @@
 Build an invariant, to check that the file at all times makes sense!
+
+Make sure that file can be accessed.. Error message if already in use!

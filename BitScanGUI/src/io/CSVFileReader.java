@@ -111,7 +111,7 @@ public class CSVFileReader implements IFileReader {
 	 * @return
 	 */
 	private TicketHolder parseCSVLine(String line) {
-		TicketHolder th = new TicketHolder();
+		TicketHolder th;
 		String[] items = line.split(",");
 
 		if (items.length != 7) {
@@ -125,9 +125,9 @@ public class CSVFileReader implements IFileReader {
 			DateTime dateTime = convertStringToDateTime(items[3]);
 			String name = items[4];
 			String email = items[5];
-			TicketSort ticketSort = new TicketSort(items[6]);
+			String ticketSortName = items[6];
 
-			th.setTicketHolder(table, id, comment, dateTime, name, email, ticketSort);
+			th = new TicketHolder(table, id, comment, dateTime, name, email, ticketSortName);
 		}
 		return th;
 	}

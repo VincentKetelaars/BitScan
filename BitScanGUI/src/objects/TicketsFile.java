@@ -2,6 +2,7 @@ package objects;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.joda.time.DateTime;
 
@@ -139,14 +140,14 @@ public class TicketsFile {
 		}
 		for (TicketHolder th : ticketHolders) {
 			sb.append(th.getTable()+","+th.getId()+","+th.getComment()+","+GeneralMethods.dateTimeToString(th.getDateTime())+","+
-					th.getName()+","+th.getEmail()+","+th.getTicketSort().getName()+System.lineSeparator());
+					th.getName()+","+th.getEmail()+","+th.getTicketSortName()+System.lineSeparator());
 		}
 		return sb.toString();
 	}
 
-	public void singleCheckIn(TicketSort ticketSort) {
+	public void singleCheckIn(String ticketSortName) {
 		for (TicketSort ts : ticketSorts) {
-			if (ts.getName().equals(ticketSort.getName())) {
+			if (ts.getName().equals(ticketSortName)) {
 				ts.singleCheckIn();
 			}
 		}
@@ -159,7 +160,56 @@ public class TicketsFile {
 			}
 		}
 		for (int i = 0; i < n; i ++) {
-			ticketHolders.add(new TicketHolder(0,"",Constants.DOOR_SOLD_TICKET_COMMENT,GeneralMethods.getCurrentTime(),"","",ticketSort));
+			ticketHolders.add(new TicketHolder(0,"",Constants.DOOR_SOLD_TICKET_COMMENT,GeneralMethods.getCurrentTime(),"","",ticketSort.getName()));
 		}
+	}
+	
+	/**
+	 * Determine whether all invariants are actually true. Return false if one of them is not.
+	 * @return
+	 */
+	public boolean invariant() {
+		// TODO: Perhaps try assert?
+		
+		boolean realFile = file != null && file.exists() && file.isFile(); 
+		// TODO: Check if file extension is correct as well
+		boolean holdersExist = ticketHolders != null && ticketHolders.size() > 0;
+		boolean eventNameExists = eventName != null && !eventName.isEmpty();
+		boolean eventDescriptionExists = eventDescription != null && !eventDescription.isEmpty();
+		boolean eventDataExist = startDate != null && endDate != null && startDate.isBefore(endDate);
+		boolean sortsExist = ticketSorts != null && ticketSorts.size() > 0;
+		boolean attributesExist = realFile && holdersExist && eventNameExists && eventDescriptionExists 
+				&& eventDataExist && sortsExist;
+		
+		if (!attributesExist)
+			return false;
+		
+		// Check if the number ticketSort tickets sold, matches the number of TicketHolders with this ticketSortName
+		HashMap<String, Integer> hm = new HashMap<String, Integer>();
+		
+		for (TicketHolder t : ticketHolders) {
+			if (!t.invariant())
+				return false;
+			if (hm.containsKey(t.getTicketSortName())) {
+				hm.put(t.getTicketSortName(), hm.get(t.getTicketSortName()) + 1); 
+			} else {
+				hm.put(t.getTicketSortName(), 1);
+			}
+		}
+		
+		for (TicketSort t : ticketSorts) {
+			int s = hm.containsKey(t.getName()) ? hm.get(t.getName()) : 0;
+			if (s != t.getSold())
+				return false;
+			if (!t.invariant())
+				return false;
+		}
+		
+		boolean notTooManySold = getSold() <= getCapacity();
+		boolean notTooManyAvailable = getAvailable() <= getCapacity() - getSold(); // Can be less if DoorSale
+		boolean notTooManyCheckedIn = getCheckedIn() <= getSold();
+		boolean ExactAmountOfTicketHolders = getTicketHolders().size() == getSold();
+		
+		return notTooManySold && notTooManyAvailable && notTooManyCheckedIn && ExactAmountOfTicketHolders;
 	}
 }

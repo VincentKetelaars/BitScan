@@ -84,9 +84,13 @@ public class Constants {
 	public static final String NOT_CSV_FILE_ERROR_MESSAGE = "You can only import CSV files!";
 	public static final String LOAD_FILE_ERROR_TITLE = "Import error";	
 	public static final String LOAD_MULTIPLE_FILES_ERROR_MESSAGE = "You can only import one file!";
+	public static final String INVARIANT_FAIL_TITLE = "Invariant Failure";
+	public static final Object INVARIANT_FAILS = "The invariant check has failed! This program can no longer be trusted";
 
 	// Door sale
 	public static final String DOOR_SOLD_TICKET_COMMENT = "Doorsale";
+
+	
 
 	// Sorting
 	public static enum SortArrayBy {BARCODE, NAME, EMAIL}
