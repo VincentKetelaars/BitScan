@@ -1,0 +1,12 @@
+identifier
+event name,event description,2013-11-10 12:00:00,2013-11-12 12:00:00,2
+regular,20,5,0,true,10.00
+VIP,10,3,0,false,17.50
+1,b44rd1,test comment,0000-00-00 00:00:00,tester ,test@test.nl,VIP
+8,lldgy9,,0000-00-00 00:00:00,robert baelde,robert_baelde@hotmail.com,regular
+9,7vzrlc,,0000-00-00 00:00:00,robert baelde,robert_baelde@hotmail.com,VIP
+10,1k8emi,,0000-00-00 00:00:00,robert baelde,robert_baelde@hotmail.com,VIP
+12,ukhp7o,test comment2,0000-00-00 00:00:00,robert baelde,robert_baelde@hotmail.com,regular
+14,cuyzik,,0000-00-00 00:00:00,test123,test@test.nl,regular
+15,70n7f9,,0000-00-00 00:00:00,test124,test@test.nl,regular
+16,39qzro,,0000-00-00 00:00:00,test125,test@test.nl,regular
