@@ -114,9 +114,16 @@ public class TicketHolder {
 	 * Updates the DateTime to the current time
 	 */
 	public void checkIn() {
-		if (dateTime != null)
+		if (dateTime == null)
 			setDateTime(GeneralMethods.getCurrentTime());
 		// TODO : Find a proper response if this ticket holder was already checked in.
+	}
+	
+	public boolean isCheckedIn() {
+		if (dateTime != null && !dateTime.isBeforeNow()) {
+			// TODO: Appropriate response!
+		}
+		return dateTime != null;
 	}
 
 	public boolean invariant() {

@@ -184,22 +184,28 @@ public class TicketsFile {
 		if (!attributesExist)
 			return false;
 		
-		// Check if the number ticketSort tickets sold, matches the number of TicketHolders with this ticketSortName
-		HashMap<String, Integer> hm = new HashMap<String, Integer>();
+		// Check if the number of ticketSort tickets sold, matches the number of TicketHolders with this ticketSortName
+		HashMap<String, Integer> matchNames = new HashMap<String, Integer>();
+		// Check if the number of ticketSorts tickets checked in, matches the number of TicketHolders checked in.
+		HashMap<String, Integer> matchCheckedIn = new HashMap<String, Integer>();
+		for (TicketSort t : ticketSorts) {
+			matchNames.put(t.getName(), 0);
+			matchCheckedIn.put(t.getName(), 0);
+		}
 		
 		for (TicketHolder t : ticketHolders) {
 			if (!t.invariant())
 				return false;
-			if (hm.containsKey(t.getTicketSortName())) {
-				hm.put(t.getTicketSortName(), hm.get(t.getTicketSortName()) + 1); 
-			} else {
-				hm.put(t.getTicketSortName(), 1);
+			matchNames.put(t.getTicketSortName(), matchNames.get(t.getTicketSortName()) + 1); 
+			if (t.isCheckedIn()) {
+				matchCheckedIn.put(t.getTicketSortName(), matchCheckedIn.get(t.getTicketSortName()) + 1);
 			}
 		}
 		
 		for (TicketSort t : ticketSorts) {
-			int s = hm.containsKey(t.getName()) ? hm.get(t.getName()) : 0;
-			if (s != t.getSold())
+			if (matchNames.get(t.getName()) != t.getSold())
+				return false;
+			if (matchCheckedIn.get(t.getName()) != t.getCheckedIn())
 				return false;
 			if (!t.invariant())
 				return false;

@@ -19,6 +19,7 @@ public class Constants {
 	/* Layout */
 	
 	// Color
+	public static final Color MAIN_BACKGROUND_COLOR = Color.BLUE;
 	public static final Color BACKGROUND_COLOR = Color.WHITE; 
 	
 	// Font

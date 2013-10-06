@@ -92,7 +92,7 @@ public class MainFrame extends JFrame implements IMainFrame {
 	 */
 	private void createMainLayout() {
 		contentPane = new JPanel();
-		contentPane.setBackground(UIManager.getColor("FormattedTextField.selectionBackground"));
+		contentPane.setBackground(UIManager.getColor("FormattedTextField.selectionBackground"));//Constants.MAIN_BACKGROUND_COLOR);
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(new BorderLayout(0, 0));
