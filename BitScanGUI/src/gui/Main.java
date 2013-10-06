@@ -4,7 +4,6 @@
 package gui;
 
 import java.awt.EventQueue;
-import java.awt.Font;
 
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;

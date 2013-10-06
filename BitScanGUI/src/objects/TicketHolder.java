@@ -1,5 +1,7 @@
 package objects;
 
+import java.util.logging.Logger;
+
 import org.joda.time.DateTime;
 
 import constants.Constants;
@@ -14,6 +16,8 @@ public class TicketHolder {
 	private String name;
 	private String email;
 	private String ticketSortName;
+
+	private final static Logger LOGGER = Logger.getLogger(TicketSort.class.getName()); 
 
 	public TicketHolder() {
 		// Don't initialize
@@ -109,7 +113,7 @@ public class TicketHolder {
 		sb.append("};");
 		return sb.toString();
 	}
-	
+
 	/**
 	 * Updates the DateTime to the current time
 	 */
@@ -118,7 +122,7 @@ public class TicketHolder {
 			setDateTime(GeneralMethods.getCurrentTime());
 		// TODO : Find a proper response if this ticket holder was already checked in.
 	}
-	
+
 	public boolean isCheckedIn() {
 		if (dateTime != null && !dateTime.isBeforeNow()) {
 			// TODO: Appropriate response!
@@ -126,24 +130,34 @@ public class TicketHolder {
 		return dateTime != null;
 	}
 
+	public void undoCheckIn() {
+		if (dateTime == null) {
+			// TODO: There is nothing to uncheck!
+		}
+		dateTime = null;
+	}
+
 	public boolean invariant() {
-		boolean tableExists = table >= 0;
-		boolean idExists = id != null; // id is the empty string in case of doorsale
-		boolean commentExists = comment != null; // comment can be empty
-		boolean dateTimeExists = dateTime == null || dateTime.isBeforeNow(); // Either checked in already or not
-		boolean nameExists = name != null; // May be empty in case of doorsale
-		boolean emailExists = email != null; // May be empty in case of doorsale
-		boolean ticketSortExists = ticketSortName != null;
-		
-		boolean allExist = tableExists && idExists && commentExists && dateTimeExists && nameExists && emailExists && ticketSortExists;
-		if (!allExist)
+		try {
+			assert table >= 0;
+			assert id != null; // id is the empty string in case of doorsale
+			assert comment != null; // comment can be empty
+			assert dateTime == null || dateTime.isEqualNow() || dateTime.isBeforeNow(); // Either checked in already or not
+			assert name != null; // May be empty in case of doorsale
+			assert email != null; // May be empty in case of doorsale
+			assert ticketSortName != null;		
+
+			if (comment.equals(Constants.DOOR_SOLD_TICKET_COMMENT)) { 
+				assert name.equals("") && email.equals("") && table == 0 && id.equals("");
+			} else {
+				assert name.length() > 0 && email.length() > 0 && table >= 0 && id.length() > 0;
+			}
+		} catch (AssertionError ae) {
+			ae.printStackTrace();
 			return false;
-		
-		boolean doorSale = comment.equals(Constants.DOOR_SOLD_TICKET_COMMENT) && name.equals("") && email.equals("")
-				&& table == 0 && id.equals("");
-		boolean preSale = name.length() > 0 && email.length() > 0 && table >= 0 && id.length() > 0;
-		
-		return doorSale || preSale;
+		}
+
+		return true;
 	}
 
 }

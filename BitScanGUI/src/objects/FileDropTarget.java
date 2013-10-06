@@ -1,7 +1,5 @@
 package objects;
 
-import gui.IMainFrame;
-
 import java.awt.Component;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.dnd.DnDConstants;
@@ -11,18 +9,14 @@ import java.awt.dnd.DropTargetDropEvent;
 import java.io.File;
 import java.util.List;
 
-import constants.Constants;
 import constants.GeneralMethods;
 
 public class FileDropTarget extends DropTargetAdapter {
 	private MainLogic mainLogic;
-	private DropTarget dropTarget;
-	private Component component;
 
 	public FileDropTarget(MainLogic ml, Component c) {
 		mainLogic = ml;
-		dropTarget = new DropTarget(c, DnDConstants.ACTION_COPY, this, true, null);
-		component = c;
+		new DropTarget(c, DnDConstants.ACTION_COPY, this, true, null);
 	}
 
 	public synchronized void drop(DropTargetDropEvent evt) {

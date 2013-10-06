@@ -7,15 +7,12 @@ import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 
-import objects.TicketHolder;
-
 
 public class NotDoneSavingNotification extends JFrame {
 	
 	int WIDTH = 200;
 	int HEIGHT = 150;
 
-	private TicketHolder ticketHolder;
 	private JFrame parentFrame;
 
 	public NotDoneSavingNotification(JFrame f) {

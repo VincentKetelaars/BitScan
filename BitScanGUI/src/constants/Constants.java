@@ -3,11 +3,8 @@ package constants;
 import java.awt.Color;
 import java.awt.Font;
 
-import javax.swing.Icon;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
-
-import org.joda.time.DateTime;
 
 /**
  * List important, project wide constants. 
@@ -86,12 +83,14 @@ public class Constants {
 	public static final String LOAD_FILE_ERROR_TITLE = "Import error";	
 	public static final String LOAD_MULTIPLE_FILES_ERROR_MESSAGE = "You can only import one file!";
 	public static final String INVARIANT_FAIL_TITLE = "Invariant Failure";
-	public static final Object INVARIANT_FAILS = "The invariant check has failed! This program can no longer be trusted";
+	public static final String INVARIANT_FAILS = "The invariant check has failed! This program can no longer be trusted";
+	public static final String CHOOSE_UNDO_CHECK_IN = "Do you wish to undo the check in of %s?";
+	public static final String CHOOSE_UNDO_CHECK_IN_TITLE = "Undo check in";
+	public static final String DOOR_SALE_CONFIRMATION = "Are you sure you want to sell the following tickets? \n%s";
+	public static final String DOOR_SALE_CONFIRMATION_TITLE = "Door sale confirmation";
 
 	// Door sale
 	public static final String DOOR_SOLD_TICKET_COMMENT = "Doorsale";
-
-	
 
 	// Sorting
 	public static enum SortArrayBy {BARCODE, NAME, EMAIL}

@@ -3,6 +3,7 @@ package objects;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.logging.Logger;
 
 import org.joda.time.DateTime;
 
@@ -24,6 +25,8 @@ public class TicketsFile {
 	private DateTime startDate;
 	private DateTime endDate;
 	private ArrayList<TicketSort> ticketSorts;
+
+	private final static Logger LOGGER = Logger.getLogger(TicketSort.class.getName()); 
 
 	public TicketsFile(File file) {
 		this.file = file;
@@ -75,7 +78,7 @@ public class TicketsFile {
 		}
 		return sold;
 	}
-	
+
 	public int getAvailable() {
 		int available = 0;
 		for (TicketSort ts : ticketSorts) {
@@ -153,69 +156,71 @@ public class TicketsFile {
 		}
 	}
 
-	public void addDoorSoldTicket(int n, TicketSort ticketSort) {
+	public void undoCheckIn(String ticketSortName) {
+		for (TicketSort ts : ticketSorts) {
+			if (ts.getName().equals(ticketSortName)) {
+				ts.undoCheckIn();
+			}
+		}
+	}
+
+	public void addDoorSoldTicket(String ticketSortName, int n) {
 		for (TicketSort ts : getTicketSorts()) {
-			if (ticketSort.getName().equals(ts.getName())) {
+			if (ticketSortName.equals(ts.getName())) {
 				ts.addDoorSoldTickets(n);
 			}
 		}
 		for (int i = 0; i < n; i ++) {
-			ticketHolders.add(new TicketHolder(0,"",Constants.DOOR_SOLD_TICKET_COMMENT,GeneralMethods.getCurrentTime(),"","",ticketSort.getName()));
+			ticketHolders.add(new TicketHolder(0,"",Constants.DOOR_SOLD_TICKET_COMMENT,GeneralMethods.getCurrentTime(),"","",ticketSortName));
 		}
 	}
-	
+
 	/**
 	 * Determine whether all invariants are actually true. Return false if one of them is not.
 	 * @return
 	 */
 	public boolean invariant() {
-		// TODO: Perhaps try assert?
-		
-		boolean realFile = file != null && file.exists() && file.isFile(); 
-		// TODO: Check if file extension is correct as well
-		boolean holdersExist = ticketHolders != null && ticketHolders.size() > 0;
-		boolean eventNameExists = eventName != null && !eventName.isEmpty();
-		boolean eventDescriptionExists = eventDescription != null && !eventDescription.isEmpty();
-		boolean eventDataExist = startDate != null && endDate != null && startDate.isBefore(endDate);
-		boolean sortsExist = ticketSorts != null && ticketSorts.size() > 0;
-		boolean attributesExist = realFile && holdersExist && eventNameExists && eventDescriptionExists 
-				&& eventDataExist && sortsExist;
-		
-		if (!attributesExist)
-			return false;
-		
-		// Check if the number of ticketSort tickets sold, matches the number of TicketHolders with this ticketSortName
-		HashMap<String, Integer> matchNames = new HashMap<String, Integer>();
-		// Check if the number of ticketSorts tickets checked in, matches the number of TicketHolders checked in.
-		HashMap<String, Integer> matchCheckedIn = new HashMap<String, Integer>();
-		for (TicketSort t : ticketSorts) {
-			matchNames.put(t.getName(), 0);
-			matchCheckedIn.put(t.getName(), 0);
-		}
-		
-		for (TicketHolder t : ticketHolders) {
-			if (!t.invariant())
-				return false;
-			matchNames.put(t.getTicketSortName(), matchNames.get(t.getTicketSortName()) + 1); 
-			if (t.isCheckedIn()) {
-				matchCheckedIn.put(t.getTicketSortName(), matchCheckedIn.get(t.getTicketSortName()) + 1);
+		try {
+			assert file != null && file.exists() && file.isFile(); 
+			// TODO: Check if file extension is correct as well
+			assert ticketHolders != null && ticketHolders.size() > 0;
+			assert eventName != null && !eventName.isEmpty();
+			assert eventDescription != null && !eventDescription.isEmpty();
+			assert startDate != null && endDate != null && startDate.isBefore(endDate);
+			assert ticketSorts != null && ticketSorts.size() > 0;
+
+			// Check if the number of ticketSort tickets sold, matches the number of TicketHolders with this ticketSortName
+			HashMap<String, Integer> matchNames = new HashMap<String, Integer>();
+			// Check if the number of ticketSorts tickets checked in, matches the number of TicketHolders checked in.
+			HashMap<String, Integer> matchCheckedIn = new HashMap<String, Integer>();
+			for (TicketSort t : ticketSorts) {
+				matchNames.put(t.getName(), 0);
+				matchCheckedIn.put(t.getName(), 0);
 			}
+
+			for (TicketHolder t : ticketHolders) {
+				t.invariant();
+				matchNames.put(t.getTicketSortName(), matchNames.get(t.getTicketSortName()) + 1); 
+				if (t.isCheckedIn()) {
+					matchCheckedIn.put(t.getTicketSortName(), matchCheckedIn.get(t.getTicketSortName()) + 1);
+				}
+			}
+
+			for (TicketSort t : ticketSorts) {
+				assert matchNames.get(t.getName()) == t.getSold() : matchNames.get(t.getName()) + " " + t.getSold();
+				assert matchCheckedIn.get(t.getName()) == t.getCheckedIn() : matchCheckedIn.get(t.getName()) + " " + t.getCheckedIn();
+				t.invariant();
+			}
+
+			assert getSold() <= getCapacity();
+			assert getAvailable() <= getCapacity() - getSold(); // Can be less if DoorSale
+			assert getCheckedIn() <= getSold();
+			assert getTicketHolders().size() == getSold();
+		} catch (AssertionError ae) {
+			ae.printStackTrace();
+			return false;
 		}
-		
-		for (TicketSort t : ticketSorts) {
-			if (matchNames.get(t.getName()) != t.getSold())
-				return false;
-			if (matchCheckedIn.get(t.getName()) != t.getCheckedIn())
-				return false;
-			if (!t.invariant())
-				return false;
-		}
-		
-		boolean notTooManySold = getSold() <= getCapacity();
-		boolean notTooManyAvailable = getAvailable() <= getCapacity() - getSold(); // Can be less if DoorSale
-		boolean notTooManyCheckedIn = getCheckedIn() <= getSold();
-		boolean ExactAmountOfTicketHolders = getTicketHolders().size() == getSold();
-		
-		return notTooManySold && notTooManyAvailable && notTooManyCheckedIn && ExactAmountOfTicketHolders;
+
+		return true;
 	}
 }

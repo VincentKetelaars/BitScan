@@ -1,6 +1,5 @@
 package objects;
 
-import gui.GreenNotification;
 import gui.IMainFrame;
 import gui.MainFrame;
 import gui.NotDoneSavingNotification;
@@ -13,6 +12,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -43,7 +44,7 @@ public class MainLogic {
 		fc.setFileFilter(filter);
 		int returnVal = fc.showDialog(mainFrame(), Constants.FILE_CHOOSER_TITLE);		
 
-		if (returnVal == fc.APPROVE_OPTION) {			 // Continue with appropriate path
+		if (returnVal == JFileChooser.APPROVE_OPTION) { // Continue with appropriate path
 			File f = fc.getSelectedFile();				
 			runFileReader(f);
 		} 
@@ -131,27 +132,31 @@ public class MainLogic {
 		return l;
 	}
 
-	public void singleTicketClicked(TicketHolder ticketHolder) {
-		if (ticketHolder.getDateTime() == null) {
+	/**
+	 * This method responds to a single click on a single ticket.
+	 * @param TicketHolder ticketHolder represents the ticket that was clicked
+	 * @return 0: ticketHolder has undergone no changes. 1: ticketHolder has been checked in. 2: ticketHolder's check in is undone 
+	 */
+	public int singleTicketClicked(TicketHolder ticketHolder) {
+		int ret = 0; // Default return value, nothing happens
+		if (!ticketHolder.isCheckedIn()) {
 			ticketHolder.checkIn();
 			ticketsFile.singleCheckIn(ticketHolder.getTicketSortName());
-
-			final GreenNotification notification = new GreenNotification(mainFrame(), ticketHolder);
-			new Thread(){
-				@Override
-				public void run() {
-					try {
-						Thread.sleep(Constants.TIMESHOWNOTIFICATION); // time after which pop up will disappear
-						notification.dispose();
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				};
-			}.start();
+			ret = 1;
 		} else {
-			// This ticket has already been checked!
+			// This ticket has already been checked in
+			int result = GeneralMethods.showYesNoDialog(mainFrame(), String.format(Constants.CHOOSE_UNDO_CHECK_IN, ticketHolder.getName()), Constants.CHOOSE_UNDO_CHECK_IN_TITLE);
+			if (result == 0) {// Yes
+				ticketHolder.undoCheckIn();
+				ticketsFile.undoCheckIn(ticketHolder.getTicketSortName());
+				ret = 2;					
+			} else { // No or closed
+				// TODO: Perhaps some action is required?
+				ret = 0; // Not necessary to assign again			
+			}
 		}
 		updateFileWriter();
+		return ret;
 	}
 
 
@@ -203,9 +208,30 @@ public class MainLogic {
 		}
 	}
 
-	public void addDoorSoldTicket(int n, TicketSort ticketSort) {
-		ticketsFile.addDoorSoldTicket(n, ticketSort);
-		updateFileWriter();
+	/**
+	 * This method presents the user with the option to renege on the door sale. 
+	 * If the user continues, ticketsFile is updated and the fileWriter updated.
+	 * @param doorSale
+	 * @return 0: Sold tickets. 1: No tickets sold.
+	 */
+	public int addDoorSoldTicket(HashMap<String, Integer> doorSale) {
+		// Ask for permission first
+		StringBuilder sb = new StringBuilder();
+		for (Map.Entry<String, Integer> d : doorSale.entrySet()) {
+			sb.append(d.getValue() + " " + d.getKey() + "\n");
+		}
+		String dialogPermissionQuestion = String.format(Constants.DOOR_SALE_CONFIRMATION, sb.toString());
+		int ret = GeneralMethods.showYesNoDialog(mainFrame(), dialogPermissionQuestion, Constants.DOOR_SALE_CONFIRMATION_TITLE);
+		if (ret == 0) { // Yes
+			// Set ticketSfile
+			for (Map.Entry<String, Integer> d : doorSale.entrySet()) {
+				ticketsFile.addDoorSoldTicket(d.getKey(), d.getValue());
+			}
+			updateFileWriter();
+		} else { // No or closed
+			// TODO: Do something here?			
+		}
+		return ret;
 	}
 
 	public TicketsFile getTicketsFile() {

@@ -7,10 +7,8 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 
 import objects.TicketHolder;
 import objects.TicketSort;

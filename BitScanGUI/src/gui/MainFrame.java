@@ -18,6 +18,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -348,7 +349,7 @@ public class MainFrame extends JFrame implements IMainFrame {
 			public void mouseReleased(final MouseEvent e) {
 				int index = list.getSelectedIndex();
 				if (index != -1 && index < finalData.length) {
-					mainLogic.singleTicketClicked(finalData[index]);
+					singleTicketClicked(finalData[index]);
 					updateListOfTicketsAndLabels(new TicketHolder[]{finalData[index]}, ticketsFile);
 				}
 			}
@@ -366,6 +367,27 @@ public class MainFrame extends JFrame implements IMainFrame {
 				showTicketsPanel.add(tp);
 			}
 		}
+	}
+
+	protected void singleTicketClicked(TicketHolder ticketHolder) {
+		int ret = mainLogic.singleTicketClicked(ticketHolder);
+		if (ret == 1)
+			showGreenNotificiation(ticketHolder);
+	}
+
+	protected void showGreenNotificiation(TicketHolder ticketHolder) {
+		final GreenNotification notification = new GreenNotification(this, ticketHolder);
+		new Thread(){
+			@Override
+			public void run() {
+				try {
+					Thread.sleep(Constants.TIMESHOWNOTIFICATION); // time after which pop up will disappear
+					notification.dispose();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			};
+		}.start();
 	}
 
 	DocumentListener numberTicketsDocumentListener = new DocumentListener() {
@@ -397,12 +419,15 @@ public class MainFrame extends JFrame implements IMainFrame {
 
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
-			// Update all the ticketSorts
+			// Add door sale tickets
+			HashMap<String, Integer> doorSale = new HashMap<String, Integer>();
 			for (TicketPanel tp : ticketPanels) {
-				int n = tp.numberOfTickets();
-				mainLogic.addDoorSoldTicket(n, tp.getTicketSort());
+				doorSale.put(tp.getTicketSort().getName(), tp.numberOfTickets());
 			}
-
+			int ret = mainLogic.addDoorSoldTicket(doorSale);
+			if (ret != 0) { // Nothing has been changed, so leave as is.
+				return;
+			}
 			// Update views
 			updateListOfTicketsAndLabels(mainLogic.getTicketsFile()); // Update list of ticketHolders and statisticsPanel
 			for (TicketPanel tp : ticketPanels) { 
@@ -418,7 +443,7 @@ public class MainFrame extends JFrame implements IMainFrame {
 			if (ths == null) {
 				return;
 			} else if (ths.size() == 1) {
-				mainLogic.singleTicketClicked(ths.get(0));
+				singleTicketClicked(ths.get(0));
 			}
 			// If one or more results, update the list with the result
 			updateListOfTicketsAndLabels(ths.toArray(new TicketHolder[0]), mainLogic.getTicketsFile());

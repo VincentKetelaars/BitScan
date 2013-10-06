@@ -5,16 +5,16 @@ import java.util.logging.Logger;
 import constants.GeneralMethods;
 
 public class TicketSort {
-	
+
 	private String name;
 	private int price; // In cents and positive
 	private int capacity;
 	private int sold;
 	private int checkedIn;
 	private boolean doorSale;
-	
+
 	private final static Logger LOGGER = Logger.getLogger(TicketSort.class.getName()); 
-		
+
 	public TicketSort(String ticketName, int price, int capacity, int sold, int checkedIn, boolean doorSale) {
 		setName(ticketName);
 		setPrice(price);
@@ -71,11 +71,11 @@ public class TicketSort {
 	public void setPrice(int price) {
 		this.price = price;
 	}
-	
+
 	public String getPriceRepresentation() {
 		return GeneralMethods.convertPriceIntToEuroString(price);
 	}
-	
+
 	public void addDoorSoldTickets(int n) {
 		if (!isDoorSale()) {
 			LOGGER.warning(String.format("A ticket is sold add the door, while this is not authorized for: %s", getName()));
@@ -84,26 +84,31 @@ public class TicketSort {
 		checkedIn += n;
 		sold += n;
 	}
-	
+
 	public void singleCheckIn() {
 		checkedIn++;
 	}
 
+	public void undoCheckIn() {
+		checkedIn--;
+	}
+
 	public boolean invariant() {
-		boolean nameExists = name != null && name.length() > 0;
-		boolean priceExists = price > 0;
-		boolean capacityExists = capacity > 0;
-		boolean soldExists = sold >= 0;
-		boolean checkedInExists = checkedIn >= 0;
-		
-		boolean allExist = nameExists && priceExists && capacityExists && soldExists && checkedInExists;
-		if (!allExist)
+		try {
+			assert name != null && name.length() > 0;
+			assert price > 0;
+			assert capacity > 0;
+			assert sold >= 0;
+			assert checkedIn >= 0;
+
+			assert sold <= capacity;
+			assert checkedIn <= sold;
+		} catch (AssertionError ae) {
+			ae.printStackTrace();
 			return false;
-		
-		boolean enoughSpace = sold <= capacity;
-		boolean notTooManyCheckedIn = checkedIn <= sold;
-		
-		return enoughSpace && notTooManyCheckedIn;
+		}
+
+		return true;
 	}
 
 }
