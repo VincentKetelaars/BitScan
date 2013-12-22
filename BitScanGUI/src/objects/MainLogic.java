@@ -11,12 +11,16 @@ import io.IFileWriter;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -37,6 +41,10 @@ public class MainLogic {
 	public JFrame mainFrame() {
 		return mainFrame.getFrame();
 	}
+	
+	public TicketHolder getTicketHolderById(String id) {
+		return new TicketHolder(ticketsFile.getTicketHolders().get(id)); // Copy of TicketHolder!
+	}
 
 	public void openFileChooser() {
 		JFileChooser fc = new JFileChooser();
@@ -51,6 +59,7 @@ public class MainLogic {
 	}
 
 	public void runFileReader(File f) {
+		SwingUtilities.invokeLater(new Runnable() {public void run() {mainFrame.showLoadingNotification();}});
 		final IFileReader fr = new CSVFileReader(f, mainFrame());
 		Runnable r = new Runnable() {
 
@@ -62,6 +71,7 @@ public class MainLogic {
 					mainFrame.updateListOfTicketsAndLabels(ticketsFile);
 					startFileWriter();
 				}
+				SwingUtilities.invokeLater(new Runnable() {public void run() {mainFrame.stopLoadingNotification();}});
 			}
 		};
 		r.run();
@@ -72,28 +82,28 @@ public class MainLogic {
 		fileWriter.open();
 	}
 
-	public TicketHolder[] sortArraybySortBy(TicketHolder[] data, SortArrayBy sortBy, boolean removeDoorSold) {
-		ArrayList<TicketHolder> filtered = new ArrayList<TicketHolder>(data.length);
+	public Collection<TicketHolder> sortArraybySortBy(Collection<TicketHolder> data, SortArrayBy sortBy, boolean removeDoorSold) {
+		ArrayList<TicketHolder> filtered = new ArrayList<TicketHolder>(data.size());
 		for (TicketHolder th : data) {
 			// Only show tickets that have not been sold at the door!
 			if (!th.getComment().equals(Constants.DOOR_SOLD_TICKET_COMMENT)) {
 				filtered.add(th);
 			}
 		}
-		return sortArraybySortBy(filtered.toArray(new TicketHolder[0]), sortBy);
+		return sortArraybySortBy(filtered, sortBy);
 	}
 
-	public TicketHolder[] sortArraybySortBy(TicketHolder[] data, SortArrayBy sortBy) {
+	public Collection<TicketHolder> sortArraybySortBy(List<TicketHolder> data, SortArrayBy sortBy) {
 		// Sorted list
 		switch (sortBy) {
 		case BARCODE: 
-			Arrays.sort(data, IDComparator);
+			Collections.sort(data, IDComparator);
 			break;
 		case NAME: 
-			Arrays.sort(data, NameComparator);
+			Collections.sort(data, NameComparator);
 			break;
 		case EMAIL: 
-			Arrays.sort(data, EmailComparator);
+			Collections.sort(data, EmailComparator);
 			break;
 		default : break;
 		}
@@ -106,21 +116,21 @@ public class MainLogic {
 		ArrayList<TicketHolder> l = new ArrayList<TicketHolder>();
 		switch (sortBy) {
 		case BARCODE: // Return if the search is the first part of the id
-			for (TicketHolder t : ticketsFile.getTicketHolders()) {
+			for (TicketHolder t : ticketsFile.getTicketHolders().values()) {
 				if (t.getId().startsWith(s)) {
 					l.add(t);
 				}
 			}
 			break;
 		case NAME: // Return if the search is contained within the name, case insensitive
-			for (TicketHolder t : ticketsFile.getTicketHolders()) {
+			for (TicketHolder t : ticketsFile.getTicketHolders().values()) {
 				if (t.getName().toLowerCase().contains(s.toLowerCase())) {
 					l.add(t);
 				}
 			}
 			break;
 		case EMAIL: // Return if the search is contained within the email, case insensitive
-			for (TicketHolder t : ticketsFile.getTicketHolders()) {
+			for (TicketHolder t : ticketsFile.getTicketHolders().values()) {
 				if (t.getEmail().toLowerCase().contains(s.toLowerCase())) {
 					l.add(t);
 				}
@@ -138,16 +148,17 @@ public class MainLogic {
 	 * @return 0: ticketHolder has undergone no changes. 1: ticketHolder has been checked in. 2: ticketHolder's check in is undone 
 	 */
 	public int singleTicketClicked(TicketHolder ticketHolder) {
+		TicketHolder th = ticketsFile.getTicketHolders().get(ticketHolder.getId()); // Make sure you have the actual TicketHolder and not a copy
 		int ret = 0; // Default return value, nothing happens
-		if (!ticketHolder.isCheckedIn()) {
-			ticketHolder.checkIn();
+		if (!th.isCheckedIn()) {
+			th.checkIn();
 			ticketsFile.singleCheckIn(ticketHolder.getTicketSortName());
 			ret = 1;
 		} else {
 			// This ticket has already been checked in
 			int result = GeneralMethods.showYesNoDialog(mainFrame(), String.format(Constants.CHOOSE_UNDO_CHECK_IN, ticketHolder.getName()), Constants.CHOOSE_UNDO_CHECK_IN_TITLE);
-			if (result == 0) {// Yes
-				ticketHolder.undoCheckIn();
+			if (result == 0) { // Yes
+				th.undoCheckIn();
 				ticketsFile.undoCheckIn(ticketHolder.getTicketSortName());
 				ret = 2;					
 			} else { // No or closed

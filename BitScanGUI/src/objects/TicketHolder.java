@@ -32,6 +32,16 @@ public class TicketHolder {
 		setEmail(email);
 		setTicketSortName(ticketSortName);
 	}
+	
+	public TicketHolder(TicketHolder th) {
+		setTable(th.getTable());
+		setId(th.getId());
+		setComment(th.getComment());
+		setDateTime(th.getDateTime());
+		setName(th.getName());
+		setEmail(th.getEmail());
+		setTicketSortName(th.getTicketSortName());
+	}
 
 	public int getTable() {
 		return table;

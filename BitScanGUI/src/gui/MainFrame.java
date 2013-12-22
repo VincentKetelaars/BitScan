@@ -18,9 +18,13 @@ import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.swing.BoxLayout;
+import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -50,6 +54,7 @@ public class MainFrame extends JFrame implements IMainFrame {
 	private JTextField searchTextField;
 	private ArrayList<TicketPanel> ticketPanels;
 	private JScrollPane scrollPane;
+	private DefaultListModel<TicketHolder> ticketListModel;
 	private JPanel showTicketsPanel;
 	private JLabel eventTitleLabel;
 	private JLabel capacityValueLabel;
@@ -61,6 +66,7 @@ public class MainFrame extends JFrame implements IMainFrame {
 	private JButton searchButton;
 	private MainLogic mainLogic;
 	private SortArrayBy sortBy = SortArrayBy.BARCODE;
+	private LoadingNotification loadingNotification;
 
 	/**
 	 * Create the frame. Determine basic settings. Initiate build of the main layout.
@@ -155,6 +161,23 @@ public class MainFrame extends JFrame implements IMainFrame {
 		scrollPane.setPreferredSize(new Dimension(800, 1000));
 		scrollPane.getViewport().setBackground(Constants.BACKGROUND_COLOR);
 		leftPanel.add(scrollPane);
+		
+		final JList<TicketHolder> list = new JList<TicketHolder>();
+		ticketListModel = new DefaultListModel<TicketHolder>();
+		list.setModel(ticketListModel);
+		list.setCellRenderer(new TicketHolderRenderer());
+		list.addMouseListener(new MouseAdapter() {
+			public void mouseReleased(final MouseEvent e) {
+				int index = list.getSelectedIndex();
+				if (index != -1 && index < ticketListModel.size()) {
+					TicketHolder th = (TicketHolder) ticketListModel.get(index);
+					singleTicketClicked(th);
+					// Whatever happens, show the same tickets
+					ticketListModel.set(index, mainLogic.getTicketHolderById(th.getId()));
+				}
+			}
+		});
+		scrollPane.setViewportView(list);
 
 		return leftPanel;
 	}
@@ -324,14 +347,14 @@ public class MainFrame extends JFrame implements IMainFrame {
 	 * Update the statisticsPanel and scrollPane, with all available ticketholders
 	 */
 	public void updateListOfTicketsAndLabels(TicketsFile ticketsFile) {
-		updateListOfTicketsAndLabels(ticketsFile.getTicketHolders().toArray(new TicketHolder[0]), ticketsFile);
+		updateListOfTicketsAndLabels(ticketsFile.getTicketHolders().values(), ticketsFile);
 	}
 
 	/**
 	 * Update the statisticsPanel and scrollPane
 	 * @param data : array of ticketholders that will be shown
 	 */
-	public void updateListOfTicketsAndLabels(TicketHolder[] data,final TicketsFile ticketsFile) {
+	public void updateListOfTicketsAndLabels(Collection<TicketHolder> data, final TicketsFile ticketsFile) {
 		eventTitleLabel.setText(ticketsFile.getEventName()); // Event label
 		eventDateLabel.setText(GeneralMethods.getEventDateString(ticketsFile));
 
@@ -339,27 +362,19 @@ public class MainFrame extends JFrame implements IMainFrame {
 		capacityValueLabel.setText(Integer.toString(ticketsFile.getCapacity()));
 		checkedInValueLabel.setText(Integer.toString(ticketsFile.getCheckedIn()));
 		availableValueLabel.setText(Integer.toString(ticketsFile.getAvailable()));
-		
-		final TicketHolder[] finalData = mainLogic.sortArraybySortBy(data, sortBy, true);
 
+		final Collection<TicketHolder> finalData = mainLogic.sortArraybySortBy(data, sortBy, true);
+
+		// Remove previous stuff
+		ticketListModel.removeAllElements();
 		// Set list
-		final JList list = new JList(finalData);
-		list.setCellRenderer(new TicketHolderRenderer());
-		list.addMouseListener(new MouseAdapter() {
-			public void mouseReleased(final MouseEvent e) {
-				int index = list.getSelectedIndex();
-				if (index != -1 && index < finalData.length) {
-					singleTicketClicked(finalData[index]);
-					updateListOfTicketsAndLabels(new TicketHolder[]{finalData[index]}, ticketsFile);
-				}
-			}
-		});
-		scrollPane.setViewportView(list);
+		for (TicketHolder th : finalData)
+			ticketListModel.addElement(th);
 
 		// Add the tickets
 		showTicketsPanel.removeAll(); // First remove any present components
 		ticketPanels = new ArrayList<TicketPanel>();
-		for (TicketSort ts : ticketsFile.getTicketSorts()) {
+		for (TicketSort ts : ticketsFile.getTicketSorts().values()) {
 			if (ts.isDoorSale()) { // Add only if doorsale is allowed!
 				TicketPanel tp = new TicketPanel(ts);
 				tp.setDocumentListener(numberTicketsDocumentListener);
@@ -369,10 +384,11 @@ public class MainFrame extends JFrame implements IMainFrame {
 		}
 	}
 
-	protected void singleTicketClicked(TicketHolder ticketHolder) {
+	protected int singleTicketClicked(TicketHolder ticketHolder) {
 		int ret = mainLogic.singleTicketClicked(ticketHolder);
 		if (ret == 1)
 			showGreenNotificiation(ticketHolder);
+		return ret;
 	}
 
 	protected void showGreenNotificiation(TicketHolder ticketHolder) {
@@ -388,6 +404,14 @@ public class MainFrame extends JFrame implements IMainFrame {
 				}
 			};
 		}.start();
+	}
+
+	public void showLoadingNotification() {
+		loadingNotification = new LoadingNotification(this);
+	}
+
+	public void stopLoadingNotification() {
+		loadingNotification.dispose();
 	}
 
 	DocumentListener numberTicketsDocumentListener = new DocumentListener() {
@@ -442,11 +466,11 @@ public class MainFrame extends JFrame implements IMainFrame {
 			ArrayList<TicketHolder> ths = mainLogic.search(searchTextField.getText(), sortBy);
 			if (ths == null) {
 				return;
-			} else if (ths.size() == 1) {
+			} else if (ths.size() == 1) { // Single result
 				singleTicketClicked(ths.get(0));
+			} else { // If one or more results, update the list with the result
+				updateListOfTicketsAndLabels(ths, mainLogic.getTicketsFile());
 			}
-			// If one or more results, update the list with the result
-			updateListOfTicketsAndLabels(ths.toArray(new TicketHolder[0]), mainLogic.getTicketsFile());
 		}
 	};	
 
@@ -457,7 +481,7 @@ public class MainFrame extends JFrame implements IMainFrame {
 			JLabel b = (JLabel) e.getSource();
 			sortBy = GeneralMethods.convertStringToSortArrayBy(b.getText());
 			if (mainLogic.getTicketsFile() != null) {
-				updateListOfTicketsAndLabels(mainLogic.getTicketsFile().getTicketHolders().toArray(new TicketHolder[0]), mainLogic.getTicketsFile());
+				updateListOfTicketsAndLabels(mainLogic.getTicketsFile().getTicketHolders().values(), mainLogic.getTicketsFile());
 			}
 		}
 
@@ -492,7 +516,7 @@ public class MainFrame extends JFrame implements IMainFrame {
 			ArrayList<TicketHolder> ths = mainLogic.search(searchTextField.getText(), sortBy);
 			if (ths == null)
 				return;
-			updateListOfTicketsAndLabels(ths.toArray(new TicketHolder[0]), mainLogic.getTicketsFile());	
+			updateListOfTicketsAndLabels(ths, mainLogic.getTicketsFile());	
 		}
 
 		@Override

@@ -59,6 +59,7 @@ public class Constants {
 	public static final String AVAILABLE_LABEL_TITLE = "Available Tickets";
 	public static final String PURCHASE_TICKET_LABEL_TITLE = "Purchase Ticket";
 	public static final String PURCHASE_TICKET_BUTTON_TITLE = "Purchase Tickets";
+	public static final String LOADING = "Loading";
 	
 	// Unicode
 	public static final String euro = "\u20ac";
@@ -76,6 +77,7 @@ public class Constants {
 	public static final String GREEN_BAR = "/images/green-bar.gif";
 	public static final String GRAY_BAR = "/images/gray-bar.png";
 	public static final String RED_BAR = "/images/red-bar.png";
+	public static final String LOADING_OBJECT = "/images/loading.gif";
 	
 	// Messages
 	public static final String LOAD_FILE_ERROR_MESSAGE = "The file contents is compromised!";

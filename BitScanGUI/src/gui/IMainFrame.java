@@ -1,5 +1,7 @@
 package gui;
 
+import java.util.Collection;
+
 import javax.swing.JFrame;
 
 import objects.TicketHolder;
@@ -11,5 +13,9 @@ public interface IMainFrame {
 	
 	public void updateListOfTicketsAndLabels(TicketsFile ticketsFile);
 	
-	public void updateListOfTicketsAndLabels(TicketHolder[] data, TicketsFile ticketsFile);	
+	public void updateListOfTicketsAndLabels(Collection<TicketHolder> data, TicketsFile ticketsFile);
+	
+	public void showLoadingNotification();
+	
+	public void stopLoadingNotification();
 }

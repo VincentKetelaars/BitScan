@@ -7,6 +7,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.swing.JFrame;
 
@@ -36,7 +37,7 @@ public class CSVFileReader implements IFileReader {
 	 * Read and parse file. 
 	 * @return TicketsFile object
 	 */
-	public TicketsFile read() {
+	public synchronized TicketsFile read() {
 		try {
 			return readFile();
 		} catch (IOException e) {
@@ -48,8 +49,8 @@ public class CSVFileReader implements IFileReader {
 
 	private TicketsFile readFile() throws IOException {
 		TicketsFile tf = new TicketsFile(file);
-		ArrayList<TicketHolder> ticketHolders = new ArrayList<TicketHolder>();
-		ArrayList<TicketSort> ticketSorts = new ArrayList<TicketSort>();
+		HashMap<String, TicketHolder> ticketHolders = new HashMap<String, TicketHolder>();
+		HashMap<String, TicketSort> ticketSorts = new HashMap<String, TicketSort>();
 
 		BufferedReader reader = Files.newBufferedReader(file.toPath(), ENCODING);
 		String line = reader.readLine();
@@ -79,14 +80,14 @@ public class CSVFileReader implements IFileReader {
 			int price = (int) (Double.parseDouble(items[5]) * 100);
 
 			TicketSort ts = new TicketSort(ticketName, price, capacity, sold, checkedIn, doorSale);
-			ticketSorts.add(ts);
+			ticketSorts.put(ticketName, ts);
 		}
 
 		// Tickets
 		while ((line = reader.readLine()) != null) {
 			TicketHolder th = parseCSVLine(line);
 			if (th != null) {
-				ticketHolders.add(th);
+				ticketHolders.put(th.getId(), th);
 			} else {
 				break;
 			}

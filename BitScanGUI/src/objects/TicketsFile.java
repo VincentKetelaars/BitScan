@@ -19,24 +19,26 @@ import constants.GeneralMethods;
 public class TicketsFile {
 
 	private File file;
-	private ArrayList<TicketHolder> ticketHolders;
+	private HashMap<String, TicketHolder> ticketHolders;
 	private String eventName;
 	private String eventDescription;
 	private DateTime startDate;
 	private DateTime endDate;
-	private ArrayList<TicketSort> ticketSorts;
+	private HashMap<String, TicketSort> ticketSorts;
+	private int doorSoldTickets;
 
 	private final static Logger LOGGER = Logger.getLogger(TicketSort.class.getName()); 
 
 	public TicketsFile(File file) {
 		this.file = file;
+		doorSoldTickets = 0;
 	}
 
-	public ArrayList<TicketHolder> getTicketHolders() {
-		return (ArrayList<TicketHolder>) ticketHolders.clone();
+	public HashMap<String, TicketHolder> getTicketHolders() {
+		return (HashMap<String, TicketHolder>) ticketHolders.clone(); // Shallow copy
 	}
 
-	public void setTicketHolders(ArrayList<TicketHolder> ticketHolders) {
+	public void setTicketHolders(HashMap<String, TicketHolder> ticketHolders) {
 		this.ticketHolders = ticketHolders;
 	}
 
@@ -47,7 +49,7 @@ public class TicketsFile {
 		sb.append("ticket holders {\n");
 
 		// Iterate over all TicketHolders
-		for (TicketHolder i : ticketHolders) {
+		for (TicketHolder i : ticketHolders.values()) {
 			sb.append("\t"+ i +"\n");
 		}
 
@@ -57,7 +59,7 @@ public class TicketsFile {
 
 	public int getCapacity() {
 		int cap = 0;
-		for (TicketSort ts : getTicketSorts()) {
+		for (TicketSort ts : getTicketSorts().values()) {
 			cap += ts.getCapacity();
 		}
 		return cap;
@@ -65,7 +67,7 @@ public class TicketsFile {
 
 	public int getCheckedIn() {
 		int checkedIn = 0;
-		for (TicketSort ts : getTicketSorts()) {
+		for (TicketSort ts : getTicketSorts().values()) {
 			checkedIn += ts.getCheckedIn();
 		}
 		return checkedIn;
@@ -73,7 +75,7 @@ public class TicketsFile {
 
 	public int getSold() {
 		int sold = 0;
-		for (TicketSort ts : ticketSorts) {
+		for (TicketSort ts : ticketSorts.values()) {
 			sold += ts.getSold();
 		}
 		return sold;
@@ -81,7 +83,7 @@ public class TicketsFile {
 
 	public int getAvailable() {
 		int available = 0;
-		for (TicketSort ts : ticketSorts) {
+		for (TicketSort ts : ticketSorts.values()) {
 			if (ts.isDoorSale()) {
 				available += ts.getCapacity() - ts.getSold();
 			}
@@ -121,11 +123,11 @@ public class TicketsFile {
 		this.endDate = endDate;
 	}
 
-	public ArrayList<TicketSort> getTicketSorts() {
+	public HashMap<String, TicketSort> getTicketSorts() {
 		return ticketSorts;
 	}
 
-	public void setTicketSorts(ArrayList<TicketSort> ticketSorts) {
+	public void setTicketSorts(HashMap<String, TicketSort> ticketSorts) {
 		this.ticketSorts = ticketSorts;
 	}
 
@@ -137,11 +139,11 @@ public class TicketsFile {
 		StringBuilder sb = new StringBuilder();
 		sb.append(eventName+","+eventDescription+","+GeneralMethods.dateTimeToString(startDate)+","+
 				GeneralMethods.dateTimeToString(endDate)+","+ticketSorts.size()+System.lineSeparator());
-		for (TicketSort ts : ticketSorts) {
+		for (TicketSort ts : ticketSorts.values()) {
 			sb.append(ts.getName()+","+ts.getCapacity()+","+ts.getSold()+","+ts.getCheckedIn()+","+ts.isDoorSale()+","+
 					GeneralMethods.convertPriceIntToString(ts.getPrice())+System.lineSeparator());
 		}
-		for (TicketHolder th : ticketHolders) {
+		for (TicketHolder th : ticketHolders.values()) {
 			sb.append(th.getTable()+","+th.getId()+","+th.getComment()+","+GeneralMethods.dateTimeToString(th.getDateTime())+","+
 					th.getName()+","+th.getEmail()+","+th.getTicketSortName()+System.lineSeparator());
 		}
@@ -149,29 +151,18 @@ public class TicketsFile {
 	}
 
 	public void singleCheckIn(String ticketSortName) {
-		for (TicketSort ts : ticketSorts) {
-			if (ts.getName().equals(ticketSortName)) {
-				ts.singleCheckIn();
-			}
-		}
+		ticketSorts.get(ticketSortName).singleCheckIn();
 	}
 
 	public void undoCheckIn(String ticketSortName) {
-		for (TicketSort ts : ticketSorts) {
-			if (ts.getName().equals(ticketSortName)) {
-				ts.undoCheckIn();
-			}
-		}
+		ticketSorts.get(ticketSortName).undoCheckIn();
 	}
 
 	public void addDoorSoldTicket(String ticketSortName, int n) {
-		for (TicketSort ts : getTicketSorts()) {
-			if (ticketSortName.equals(ts.getName())) {
-				ts.addDoorSoldTickets(n);
-			}
-		}
+		ticketSorts.get(ticketSortName).addDoorSoldTickets(n);
 		for (int i = 0; i < n; i ++) {
-			ticketHolders.add(new TicketHolder(0,"",Constants.DOOR_SOLD_TICKET_COMMENT,GeneralMethods.getCurrentTime(),"","",ticketSortName));
+			String id = ""+(doorSoldTickets++); // TODO: Find better ID
+			ticketHolders.put(id, new TicketHolder(0,id,Constants.DOOR_SOLD_TICKET_COMMENT,GeneralMethods.getCurrentTime(),"","",ticketSortName));
 		}
 	}
 
@@ -193,12 +184,12 @@ public class TicketsFile {
 			HashMap<String, Integer> matchNames = new HashMap<String, Integer>();
 			// Check if the number of ticketSorts tickets checked in, matches the number of TicketHolders checked in.
 			HashMap<String, Integer> matchCheckedIn = new HashMap<String, Integer>();
-			for (TicketSort t : ticketSorts) {
+			for (TicketSort t : ticketSorts.values()) {
 				matchNames.put(t.getName(), 0);
 				matchCheckedIn.put(t.getName(), 0);
 			}
 
-			for (TicketHolder t : ticketHolders) {
+			for (TicketHolder t : ticketHolders.values()) {
 				t.invariant();
 				matchNames.put(t.getTicketSortName(), matchNames.get(t.getTicketSortName()) + 1); 
 				if (t.isCheckedIn()) {
@@ -206,7 +197,7 @@ public class TicketsFile {
 				}
 			}
 
-			for (TicketSort t : ticketSorts) {
+			for (TicketSort t : ticketSorts.values()) {
 				assert matchNames.get(t.getName()) == t.getSold() : matchNames.get(t.getName()) + " " + t.getSold();
 				assert matchCheckedIn.get(t.getName()) == t.getCheckedIn() : matchCheckedIn.get(t.getName()) + " " + t.getCheckedIn();
 				t.invariant();

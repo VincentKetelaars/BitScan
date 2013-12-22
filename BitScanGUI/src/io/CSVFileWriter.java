@@ -65,7 +65,7 @@ public class CSVFileWriter implements IFileWriter {
 
 	private class FileWriterRunner implements Runnable {
 
-		public void run() {
+		public synchronized void run() {
 			try {
 				fw = new FileWriter(ticketFile.getFile(), false);
 			} catch (FileNotFoundException e) {
